@@ -1,6 +1,8 @@
 package de.fhhannover.inform.trust.ironflow.publisher;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Date;
 
 import javax.ws.rs.client.WebTarget;
 
@@ -41,8 +43,7 @@ public class RequestDeviceList extends RequestStrategy {
 		WebTarget resourceWebTarget = webTarget.path("/wm/device/");
 		
 		jsonString = this.getResponse(resourceWebTarget).readEntity(String.class);
-		
-		System.out.println(this.getResponse(resourceWebTarget).getStatus());
+
 	    System.out.println(jsonString);
 						    	    
 		try {
@@ -50,28 +51,62 @@ public class RequestDeviceList extends RequestStrategy {
 			rootNode = mapper.readValue(jsonString, JsonNode.class);
 			
 			for (JsonNode node : rootNode) {
-
-				JsonNode nodeMacs = node.path("mac");
-				for (JsonNode nodeMacItr : nodeMacs) {					
-					MacAddress mac = Identifiers.createMac(nodeMacItr.getTextValue()); //erzeugt Identifier MAC Adresse
-					System.out.println(nodeMacItr.toString());
-				}
 				
-				JsonNode nodeIps = node.path("ipv4");
-				for (JsonNode nodeIpItr : nodeIps) {					
-					IpAddress ip = Identifiers.createIp4(nodeIpItr.getTextValue()); // erzeugt Identifier IP Adresse
-					System.out.println(nodeIpItr.toString());
-				}								
+				JsonNode nodeLastSeen = node.path("lastSeen");
+				Date date = new Date(nodeLastSeen.getLongValue());
+				System.out.println(date);
 				
-				//ssrc.publish(Requests.createPublishReq(Requests.createPublishUpdate(ip, mac, getMetadataFactory().createIpMac(), MetadataLifetime.forever)));
-								
-				JsonNode nodeAttachmentPoint = node.path("attachmentPoint");
-				for (JsonNode node2 : nodeAttachmentPoint) {
-					Device dev = Identifiers.createDev("Switch: "+node2.path("switchDPID").toString()); //erzeugt Identifier Device
-					AccessRequest ar = Identifiers.createAr("Client: "+node2.path("port").toString()); //erzeugt Identifier AccessRequest
-					//System.out.println("Switch: "+node2.path("switchDPID").toString()+ "\n");
-					//ssrc.publish(Requests.createPublishReq(Requests.createPublishUpdate(ar, mac, getMetadataFactory().createArMac(), MetadataLifetime.forever)));
-					ssrc.publish(Requests.createPublishReq(Requests.createPublishUpdate(dev, ar, getMetadataFactory().createLayer2Information(null, null, node2.path("port").getIntValue() , null), MetadataLifetime.forever)));	
+				if(nodeLastSeen.getLongValue() >= System.currentTimeMillis() - 600000 ){
+					
+					JsonNode nodeMacs = node.path("mac");
+					for (JsonNode nodeMacItr : nodeMacs) {					
+						MacAddress mac = Identifiers.createMac(nodeMacItr.getTextValue()); //erzeugt Identifier MAC Adresse
+						System.out.println(nodeMacItr.toString());
+					}
+					
+					JsonNode nodeIps = node.path("ipv4");
+					for (JsonNode nodeIpItr : nodeIps) {					
+						IpAddress ip = Identifiers.createIp4(nodeIpItr.getTextValue()); // erzeugt Identifier IP Adresse
+						System.out.println(nodeIpItr.toString());
+					}
+					
+					JsonNode nodeVlan = node.path("vlan");
+					for (JsonNode nodeVlanItr : nodeVlan) {					
+						int port = nodeVlanItr.getIntValue(); // erzeugt Identifier IP Adresse
+						System.out.println(nodeVlanItr.toString());
+					}	
+															
+					JsonNode nodeAttachmentPoint = node.path("attachmentPoint");
+					for (JsonNode nodeAttachmentPointItr : nodeAttachmentPoint) {
+						
+						JsonNode port = nodeAttachmentPointItr.path("port");
+						if(port.getIntValue() >= 0){ // Nur Ports im positiven bereich
+							Device dev = Identifiers.createDev("Switch: "+nodeAttachmentPointItr.path("switchDPID").getTextValue()); //erzeugt Identifier Device
+							AccessRequest ar = Identifiers.createAr("Client: "+port.getIntValue()); //erzeugt Identifier AccessRequest
+						}
+					}
+					
+					/*
+					PublishDelete del = Requests.createPublishDelete(ip, mac, "meta:ip-mac");
+					del.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
+							IfmapStrings.STD_METADATA_NS_URI);
+					ssrc.publish(Requests.createPublishReq(del));
+					
+					del = Requests.createPublishDelete(dev, ip, "meta:device-ip");
+					del.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
+							IfmapStrings.STD_METADATA_NS_URI);
+					ssrc.publish(Requests.createPublishReq(del));
+					
+					del = Requests.createPublishDelete(ar, dev, "meta:layer2-information");
+					del.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
+							IfmapStrings.STD_METADATA_NS_URI);
+					ssrc.publish(Requests.createPublishReq(del));
+					*/
+					//ssrc.publish(Requests.createPublishReq(Requests.createPublishUpdate(ip, mac, getMetadataFactory().createIpMac(), MetadataLifetime.forever)));
+					//ssrc.publish(Requests.createPublishReq(Requests.createPublishUpdate(ar, mac, getMetadataFactory().createArMac(), MetadataLifetime.forever)));					
+					//ssrc.publish(Requests.createPublishReq(Requests.createPublishUpdate(dev, ar, getMetadataFactory().createLayer2Information(null, null, port.getIntValue() , null), MetadataLifetime.forever)));	
+					
+					
 				}
 								
 			}			
@@ -86,13 +121,13 @@ public class RequestDeviceList extends RequestStrategy {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IfmapErrorResult e) {
+		} /*catch (IfmapErrorResult e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IfmapException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
 		
 		
