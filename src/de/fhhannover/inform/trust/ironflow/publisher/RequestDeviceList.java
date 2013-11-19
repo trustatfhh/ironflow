@@ -2,6 +2,7 @@ package de.fhhannover.inform.trust.ironflow.publisher;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.ws.rs.client.WebTarget;
@@ -10,6 +11,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.w3c.dom.Document;
 
 import de.fhhannover.inform.trust.ifmapj.channel.SSRC;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapErrorResult;
@@ -20,6 +22,8 @@ import de.fhhannover.inform.trust.ifmapj.identifier.Identifiers;
 import de.fhhannover.inform.trust.ifmapj.identifier.IpAddress;
 import de.fhhannover.inform.trust.ifmapj.identifier.MacAddress;
 import de.fhhannover.inform.trust.ifmapj.messages.MetadataLifetime;
+import de.fhhannover.inform.trust.ifmapj.messages.PublishRequest;
+import de.fhhannover.inform.trust.ifmapj.messages.PublishUpdate;
 import de.fhhannover.inform.trust.ifmapj.messages.Requests;
 
 /**
@@ -42,9 +46,22 @@ public class RequestDeviceList extends RequestStrategy {
 		ObjectMapper mapper = new ObjectMapper();
 		WebTarget resourceWebTarget = webTarget.path("/wm/device/");
 		
+		ArrayList<MacAddress> macsNew = new ArrayList<MacAddress>();
+		ArrayList<MacAddress> macsOld = new ArrayList<MacAddress>();
+		ArrayList<IpAddress> ipsNew = new ArrayList<IpAddress>();
+		ArrayList<IpAddress> ipsOld = new ArrayList<IpAddress>();
+		ArrayList<Integer> vlansNew = new ArrayList<Integer>();
+		ArrayList<Integer> vlansOld = new ArrayList<Integer>();
+		ArrayList<Device> devicesNew = new ArrayList<Device>();
+		ArrayList<Device> devicesOld = new ArrayList<Device>();
+		ArrayList<Integer> portsNew = new ArrayList<Integer>();
+		ArrayList<Integer> portsOld = new ArrayList<Integer>();		
+		
+		long expireTime = System.currentTimeMillis() - 600000;
+		
 		jsonString = this.getResponse(resourceWebTarget).readEntity(String.class);
 
-	    System.out.println(jsonString);
+		System.out.println(jsonString);
 						    	    
 		try {
 			
@@ -52,39 +69,15 @@ public class RequestDeviceList extends RequestStrategy {
 			
 			for (JsonNode node : rootNode) {
 				
-				JsonNode nodeLastSeen = node.path("lastSeen");
-				Date date = new Date(nodeLastSeen.getLongValue());
-				System.out.println(date);
-				
-				if(nodeLastSeen.getLongValue() >= System.currentTimeMillis() - 600000 ){
+				long lastSeen = node.path("lastSeen").getLongValue();
+								
+				if(lastSeen >= expireTime ){ // newer than expireTime
 					
-					JsonNode nodeMacs = node.path("mac");
-					for (JsonNode nodeMacItr : nodeMacs) {					
-						MacAddress mac = Identifiers.createMac(nodeMacItr.getTextValue()); //erzeugt Identifier MAC Adresse
-						System.out.println(nodeMacItr.toString());
-					}
-					
-					JsonNode nodeIps = node.path("ipv4");
-					for (JsonNode nodeIpItr : nodeIps) {					
-						IpAddress ip = Identifiers.createIp4(nodeIpItr.getTextValue()); // erzeugt Identifier IP Adresse
-						System.out.println(nodeIpItr.toString());
-					}
-					
-					JsonNode nodeVlan = node.path("vlan");
-					for (JsonNode nodeVlanItr : nodeVlan) {					
-						int port = nodeVlanItr.getIntValue(); // erzeugt Identifier IP Adresse
-						System.out.println(nodeVlanItr.toString());
-					}	
-															
-					JsonNode nodeAttachmentPoint = node.path("attachmentPoint");
-					for (JsonNode nodeAttachmentPointItr : nodeAttachmentPoint) {
-						
-						JsonNode port = nodeAttachmentPointItr.path("port");
-						if(port.getIntValue() >= 0){ // Nur Ports im positiven bereich
-							Device dev = Identifiers.createDev("Switch: "+nodeAttachmentPointItr.path("switchDPID").getTextValue()); //erzeugt Identifier Device
-							AccessRequest ar = Identifiers.createAr("Client: "+port.getIntValue()); //erzeugt Identifier AccessRequest
-						}
-					}
+					fillMacArrayList(node, macsNew); // bad c stile but no other better possibility 
+					fillIpArrayList(node, ipsNew);
+					fillVlanArrayList(node, vlansNew);
+					fillDeviceArrayList(node, devicesNew);
+					fillPortArrayList(node, portsNew);
 					
 					/*
 					PublishDelete del = Requests.createPublishDelete(ip, mac, "meta:ip-mac");
@@ -102,13 +95,52 @@ public class RequestDeviceList extends RequestStrategy {
 							IfmapStrings.STD_METADATA_NS_URI);
 					ssrc.publish(Requests.createPublishReq(del));
 					*/
-					//ssrc.publish(Requests.createPublishReq(Requests.createPublishUpdate(ip, mac, getMetadataFactory().createIpMac(), MetadataLifetime.forever)));
-					//ssrc.publish(Requests.createPublishReq(Requests.createPublishUpdate(ar, mac, getMetadataFactory().createArMac(), MetadataLifetime.forever)));					
-					//ssrc.publish(Requests.createPublishReq(Requests.createPublishUpdate(dev, ar, getMetadataFactory().createLayer2Information(null, null, port.getIntValue() , null), MetadataLifetime.forever)));	
+																
+					
+					for(int i = 0; i < portsNew.size(); i++){
+						if(portsNew.get(i) > 0){ //Device publish only if port not under null
+							
+							AccessRequest ar = Identifiers.createAr("Client: "+portsNew.get(i));
+							
+							Document docLayer2 = getMetadataFactory().createLayer2Information(vlansNew.get(0), null, portsNew.get(i), null);					
+							PublishUpdate publishLayer2 = Requests.createPublishUpdate(devicesNew.get(i), ar, docLayer2, MetadataLifetime.session);
+							
+							Document docArMac = getMetadataFactory().createArMac();
+							PublishUpdate publishArMac = Requests.createPublishUpdate(ar, macsNew.get(0), docArMac, MetadataLifetime.session);
+							
+							ssrc.publish(Requests.createPublishReq(publishLayer2));
+							ssrc.publish(Requests.createPublishReq(publishArMac));
+							
+							
+							for(int j = 0;j< ipsNew.size();j++){
+								Document docIpMac = getMetadataFactory().createIpMac();
+								PublishUpdate publishIpMac = Requests.createPublishUpdate(ipsNew.get(i), macsNew.get(0), docIpMac, MetadataLifetime.session);
+								ssrc.publish(Requests.createPublishReq(publishIpMac));
+							}
+							
+						}
+						
+					}
 					
 					
-				}
-								
+					
+	
+				} else if(lastSeen < expireTime){ // older then expireTime
+					
+					fillMacArrayList(node,macsOld); // bad c stile but no other better possibility
+					fillIpArrayList(node, ipsOld);
+					fillVlanArrayList(node, vlansOld);
+					fillDeviceArrayList(node, devicesOld);
+					fillPortArrayList(node, portsOld);
+					//TODO			
+				}							
+			
+				macsNew.clear();
+				macsOld.clear();
+				ipsNew.clear();
+				ipsOld.clear();
+				vlansNew.clear();
+				vlansOld.clear();								
 			}			
 				
 			
@@ -121,18 +153,60 @@ public class RequestDeviceList extends RequestStrategy {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} /*catch (IfmapErrorResult e) {
+		} catch (IfmapErrorResult e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IfmapException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
-		
-		
-		
-		
+		}
+			
 		
 	}
 
+	private ArrayList<MacAddress> fillMacArrayList(JsonNode node, ArrayList<MacAddress> macs){
+	
+		JsonNode nodeMacs = node.path("mac");
+		for (JsonNode nodeMacItr : nodeMacs) {					
+			macs.add(Identifiers.createMac(nodeMacItr.getTextValue()));
+		}		
+		return macs;		
+	}
+	
+	private ArrayList<IpAddress> fillIpArrayList(JsonNode node, ArrayList<IpAddress> ips){
+		
+		JsonNode nodeIps = node.path("ipv4");
+		for (JsonNode nodeIpItr : nodeIps) {					
+			ips.add(Identifiers.createIp4(nodeIpItr.getTextValue()));
+		}
+		return ips;		
+	}
+	
+	private ArrayList<Integer> fillVlanArrayList(JsonNode node, ArrayList<Integer> vlans){
+		
+		JsonNode nodeVlan = node.path("vlan");
+		for (JsonNode nodeVlanItr : nodeVlan) {					
+			vlans.add(nodeVlanItr.getIntValue());
+		}
+		return vlans;			
+	}
+	
+	private ArrayList<Device> fillDeviceArrayList(JsonNode node, ArrayList<Device> devices){
+		
+		JsonNode nodeAttachmentPoint = node.path("attachmentPoint");
+		for (JsonNode nodeAttachmentPointItr : nodeAttachmentPoint) {			
+			devices.add(Identifiers.createDev("Switch: "+nodeAttachmentPointItr.path("switchDPID").getTextValue()));			
+		}
+		return devices;		
+	}
+	
+	private ArrayList<Integer> fillPortArrayList(JsonNode node, ArrayList<Integer> ports){
+		
+		JsonNode nodeAttachmentPoint = node.path("attachmentPoint");
+		for (JsonNode nodeAttachmentPointItr : nodeAttachmentPoint) {
+			ports.add(nodeAttachmentPointItr.path("port").getIntValue()); 
+		}
+		return ports;		
+	}
+	
 }
