@@ -52,6 +52,8 @@ public class Configuration {
 	    //publisher	    
 	    private static final String OPENFLOW_CONTROLLER_POLL_INTERVAL = "ironflow.poll.interval";
 	    private static final String OPENFLOW_CLASSNAME_PROPERTIES_FILENAME = "ironflow.requeststrategies.publisher";
+	    private static final String IRONFLOW_DEVICE_EXPIRE_TIME = "ironflow.device.expire.time";
+	    
 	    
 	    // subscriber
 	    private static final String SUBSCRIBER_PDP = "ironflow.subscriber.pdp";
@@ -157,14 +159,18 @@ public class Configuration {
 	        return Integer.parseInt(get(OPENFLOW_CONTROLLER_POLL_INTERVAL));
 	    }
 	    
+	    public static int ironflowDeviceExpireTime() {
+	        return Integer.parseInt(get(IRONFLOW_DEVICE_EXPIRE_TIME));
+	    }
+	    
 	    public static String openflowClassnamePropertiesFilename() {
 	        return get(OPENFLOW_CLASSNAME_PROPERTIES_FILENAME);
 	    }
-
+	    
 	    public static int ifmapKeepalive() {
 	        return Integer.parseInt(get(IFMAP_KEEPALIVE));
 	    }
-
+	    
 	    public static String subscriberPdp() {
 	        return get(SUBSCRIBER_PDP);
 	    }
