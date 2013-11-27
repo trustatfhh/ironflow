@@ -15,7 +15,6 @@ import de.fhhannover.inform.trust.ifmapj.binding.IfmapStrings;
 import de.fhhannover.inform.trust.ifmapj.channel.SSRC;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapErrorResult;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapException;
-import de.fhhannover.inform.trust.ifmapj.identifier.AccessRequest;
 import de.fhhannover.inform.trust.ifmapj.identifier.Device;
 import de.fhhannover.inform.trust.ifmapj.identifier.Identifiers;
 import de.fhhannover.inform.trust.ifmapj.identifier.IpAddress;
@@ -81,70 +80,74 @@ public class RequestDeviceList extends RequestStrategy {
 					// At this time a Device can only have 1 mac and one port to be connected
 					if(macsNew.size() > 0 && devicesNew.size() > 0 && portsNew.size() > 0){
 						if(portsNew.get(0) > 0){ //Device publish only if port not under null
-							
-							AccessRequest ar = Identifiers.createAr("Client: "+portsNew.get(0));
-							
-							Document docArMac = getMetadataFactory().createArMac();
-							PublishUpdate publishArMac = Requests.createPublishUpdate(
-									ar, macsNew.get(0), docArMac, MetadataLifetime.session);
-							ssrc.publish(Requests.createPublishReq(publishArMac));
-							
+																
+							Document docDiscoByMac = getMetadataFactory().createDiscoveredBy();					
+							PublishUpdate publishDiscoByMac = Requests.createPublishUpdate(
+									devicesNew.get(0),macsNew.get(0), docDiscoByMac, MetadataLifetime.session);															
+							ssrc.publish(Requests.createPublishReq(publishDiscoByMac));	
+														
 							// update delete with ips
 							for(int j = 0;j< ipsNew.size();j++){
 								
+								//del ip-mac
 								PublishDelete del = Requests.createPublishDelete(
 										ipsNew.get(j), macsNew.get(0), "meta:ip-mac");
 								del.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
 										IfmapStrings.STD_METADATA_NS_URI);
 								ssrc.publish(Requests.createPublishReq(del));
-								
+								//del discovered by		
+								PublishDelete delDiscoByIp = Requests.createPublishDelete(
+										ipsNew.get(j), devicesNew.get(0), "meta:discovered-by");
+								delDiscoByIp.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
+										IfmapStrings.STD_METADATA_NS_URI);
+								ssrc.publish(Requests.createPublishReq(delDiscoByIp));
+								// add ip-mac
 								Document docIpMac = getMetadataFactory().createIpMac();
 								PublishUpdate publishIpMac = Requests.createPublishUpdate(
 										ipsNew.get(j), macsNew.get(0), docIpMac, MetadataLifetime.session);
-								ssrc.publish(Requests.createPublishReq(publishIpMac));
-							}
-							
+								ssrc.publish(Requests.createPublishReq(publishIpMac));								
+								//add discovered by
+								Document docDiscoByIp = getMetadataFactory().createDiscoveredBy();	
+								PublishUpdate publishDiscoByIp = Requests.createPublishUpdate(
+										devicesNew.get(0),ipsNew.get(j), docDiscoByIp, MetadataLifetime.session);															
+								ssrc.publish(Requests.createPublishReq(publishDiscoByIp));
+							}							
 							// update delete with vlans
 							for(int j = 0;j< vlansNew.size();j++){
-								
-								PublishDelete del = Requests.createPublishDelete();
-						        String filter = String.format("meta:layer2-information[@ifmap-publisher-id='%s' "
-						                + "and vlan='%s' and port='%s']",
+								//del layer 2 
+						        String filter = String.format(
+						        		"meta:layer2-information[@ifmap-publisher-id='%s' and vlan='%s' and port='%s']",
 						                ssrc.getPublisherId(), vlansNew.get(j), portsNew.get(j));
-
-						        del.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
-						        		IfmapStrings.STD_METADATA_NS_URI);
-						        del.setFilter(filter);
-						        del.setIdentifier1(devicesNew.get(0));
-						        del.setIdentifier2(ar);
+								PublishDelete del = Requests.createPublishDelete(
+										devicesNew.get(0),macsNew.get(0),filter);
+						        del.addNamespaceDeclaration(
+						        		IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI);
 						        ssrc.publish(Requests.createPublishReq(del));
-										
+								//add layer2 not specific conform		
 								Document docLayer2 = getMetadataFactory().createLayer2Information(
 										vlansNew.get(0), null, portsNew.get(j), null);					
 								PublishUpdate publishLayer2 = Requests.createPublishUpdate(
-										devicesNew.get(0), ar, docLayer2, MetadataLifetime.session);															
+										devicesNew.get(0), macsNew.get(0), docLayer2, MetadataLifetime.session);															
 								ssrc.publish(Requests.createPublishReq(publishLayer2));								
 							}
 							// update delete with no vlans
 							if(vlansNew.size() == 0){
-								
-								PublishDelete del = Requests.createPublishDelete();
-						        String filter = String.format("meta:layer2-information[@ifmap-publisher-id='%s' "
-						                + "and port='%s']",
+								//del layer2
+						        String filter = String.format(
+						        		"meta:layer2-information[@ifmap-publisher-id='%s' and port='%s']",
 						                ssrc.getPublisherId(), portsNew.get(0));
-
-						        del.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
-						        		IfmapStrings.STD_METADATA_NS_URI);
-						        del.setFilter(filter);
-						        del.setIdentifier1(devicesNew.get(0));
-						        del.setIdentifier2(ar);
+								PublishDelete del = Requests.createPublishDelete(
+										devicesNew.get(0),macsNew.get(0),filter);
+						        del.addNamespaceDeclaration(
+						        		IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI);
 						        ssrc.publish(Requests.createPublishReq(del));
 								
+						        //add layer2 not specific conform
 								Document docLayer2 = getMetadataFactory().createLayer2Information(
 										null, null, portsNew.get(0), null);					
 								PublishUpdate publishLayer2 = Requests.createPublishUpdate(
-										devicesNew.get(0), ar, docLayer2, MetadataLifetime.session);															
-								ssrc.publish(Requests.createPublishReq(publishLayer2));	
+										devicesNew.get(0),macsNew.get(0), docLayer2, MetadataLifetime.session);															
+								ssrc.publish(Requests.createPublishReq(publishLayer2));									
 							}							
 						}
 					}
@@ -153,8 +156,7 @@ public class RequestDeviceList extends RequestStrategy {
 					ipsNew.clear();
 					vlansNew.clear();
 					devicesNew.clear();
-					portsNew.clear();
-					
+					portsNew.clear();					
 	
 				} else if(lastSeen < expireTime){ // older then expireTime
 					
@@ -166,50 +168,56 @@ public class RequestDeviceList extends RequestStrategy {
 										
 					if(macsOld.size() > 0 && devicesOld.size() > 0 && portsOld.size() > 0){
 						if(portsOld.get(0) > 0){ //Device publish only if port not under null
-							
-							AccessRequest ar = Identifiers.createAr("Client: "+portsOld.get(0));
-	
-							PublishDelete delArMac = Requests.createPublishDelete(ar, macsOld.get(0), "meta:access-request-mac");
-							delArMac.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
-									IfmapStrings.STD_METADATA_NS_URI);
-							ssrc.publish(Requests.createPublishReq(delArMac));
-							
+							//del discovered by								
+							PublishDelete delDiscoByMac = Requests.createPublishDelete(
+									devicesOld.get(0), macsOld.get(0), "meta:discovered-by");
+							delDiscoByMac.addNamespaceDeclaration(
+									IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI);
+							ssrc.publish(Requests.createPublishReq(delDiscoByMac));
+															
 							// with ips delete
 							for(int j = 0;j< ipsOld.size();j++){
 								
-								PublishDelete delIpMac = Requests.createPublishDelete(ipsOld.get(j), macsOld.get(0), "meta:ip-mac");
-								delIpMac.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
-										IfmapStrings.STD_METADATA_NS_URI);
-								ssrc.publish(Requests.createPublishReq(delIpMac));								
-							}							
+								//del ip-mac
+								PublishDelete del = Requests.createPublishDelete(
+										ipsOld.get(j), macsOld.get(0), "meta:ip-mac");
+								del.addNamespaceDeclaration(
+										IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI);
+								ssrc.publish(Requests.createPublishReq(del));
+								
+								//del discovered by		
+								String filter = String.format(
+										"meta:discovered-by[@ifmap-publisher-id='%s']", ssrc.getPublisherId());
+								PublishDelete delDiscoByIp = Requests.createPublishDelete(
+										ipsOld.get(j), devicesOld.get(0),filter);										 
+								delDiscoByIp.addNamespaceDeclaration(
+										IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI);
+								ssrc.publish(Requests.createPublishReq(delDiscoByIp));					
+							}	
+							
 							//with vlans delete
 							for(int j = 0;j< vlansOld.size();j++){
 								
-								PublishDelete del = Requests.createPublishDelete();
-						        String filter = String.format("meta:layer2-information[@ifmap-publisher-id='%s' "
-						                + "and vlan='%s' and port='%s']",
-						                ssrc.getPublisherId(), vlansOld.get(j), portsOld.get(j));
-
-						        del.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
-						        		IfmapStrings.STD_METADATA_NS_URI);
-						        del.setFilter(filter);
-						        del.setIdentifier1(devicesOld.get(0));
-						        del.setIdentifier2(ar);
+						        String filter = String.format(
+						        		"meta:layer2-information[@ifmap-publisher-id='%s' and vlan='%s' and port='%s']",
+						        		ssrc.getPublisherId(), vlansOld.get(j), portsOld.get(j)	);						        
+								PublishDelete del = Requests.createPublishDelete(
+										devicesOld.get(0),macsOld.get(0),filter	);								
+						        del.addNamespaceDeclaration(
+						        		IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI );						        
 						        ssrc.publish(Requests.createPublishReq(del));					
 							}
+							
 							// no vlans delete
 							if(vlansOld.size() == 0){
-								
-								PublishDelete del = Requests.createPublishDelete();
-						        String filter = String.format("meta:layer2-information[@ifmap-publisher-id='%s' "
-						                + "and port='%s']",
+																
+						        String filter = String.format(
+						        		"meta:layer2-information[@ifmap-publisher-id='%s' and port='%s']",
 						                ssrc.getPublisherId(), portsOld.get(0));
-
-						        del.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
-						        		IfmapStrings.STD_METADATA_NS_URI);
-						        del.setFilter(filter);
-						        del.setIdentifier1(devicesOld.get(0));
-						        del.setIdentifier2(ar);
+						        PublishDelete del = Requests.createPublishDelete(
+						        		devicesOld.get(0), macsOld.get(0), filter);
+						        del.addNamespaceDeclaration(
+						        		IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI);
 						        ssrc.publish(Requests.createPublishReq(del));
 							}							
 						}
