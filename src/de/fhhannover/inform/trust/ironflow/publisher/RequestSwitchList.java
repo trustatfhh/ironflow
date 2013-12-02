@@ -21,16 +21,28 @@ import de.fhhannover.inform.trust.ifmapj.channel.SSRC;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapErrorResult;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapException;
 import de.fhhannover.inform.trust.ifmapj.identifier.Device;
+import de.fhhannover.inform.trust.ifmapj.identifier.Identifier;
 import de.fhhannover.inform.trust.ifmapj.identifier.Identifiers;
 import de.fhhannover.inform.trust.ifmapj.identifier.IpAddress;
 import de.fhhannover.inform.trust.ifmapj.messages.MetadataLifetime;
 import de.fhhannover.inform.trust.ifmapj.messages.PublishDelete;
 import de.fhhannover.inform.trust.ifmapj.messages.PublishUpdate;
 import de.fhhannover.inform.trust.ifmapj.messages.Requests;
+import de.fhhannover.inform.trust.ifmapj.metadata.Cardinality;
 import de.fhhannover.inform.trust.ironflow.Configuration;
+
+
+/**
+ * This class is the Implementation to Request the OpenflowController for all connected switches 
+ * and the controller himself 
+ * 
+ * @author Marius Rohde
+ *
+ */
 
 public class RequestSwitchList extends RequestStrategy {
 
+	public static final String IRONFLOW_METADATA_NS_URI =  "http://trust.f4.hs-hannover.de/ironflow";
 	
 	private HashMap<String, String> switchesAndIps = new HashMap<String, String>();
 	
@@ -54,7 +66,8 @@ public class RequestSwitchList extends RequestStrategy {
 		
 		try {
 			
-			//device-ip not specific conform 
+			//device-ip not specific conform
+			// create controller-ip
 			Device devController = Identifiers.createDev("OpenFlowController");
 			IpAddress ipController = Identifiers.createIp4(Configuration.openFlowControllerIP());			
 			Document devIp = getMetadataFactory().createDevIp();
@@ -63,7 +76,7 @@ public class RequestSwitchList extends RequestStrategy {
 			ssrc.publish(Requests.createPublishReq(publishDevIp));
 			
 			//not specific conform ...why capability here ?
-			
+			// create capability - Controller
 			String filterCap = String.format(
 					"meta:capability[@ifmap-publisher-id='%s']", ssrc.getPublisherId());
 			PublishDelete delCap = Requests.createPublishDelete(devController,filterCap);
@@ -75,6 +88,18 @@ public class RequestSwitchList extends RequestStrategy {
 			PublishUpdate publishCapController = Requests.createPublishUpdate(
 					devController,capController,MetadataLifetime.session);		
 			ssrc.publish(Requests.createPublishReq(publishCapController));
+			
+			//Create Openflow extended identifier 
+			Identifier extIdOpenflowGroup = Identifiers.createExtendedIdentity(
+					getClass().getResourceAsStream("/openflowGroup.xml"));
+			//Create Controller-group member-of
+			Document controllerMemberOfGroup = getMetadataFactory().create(
+					"member-of",IfmapStrings.STD_METADATA_PREFIX,
+					IRONFLOW_METADATA_NS_URI, Cardinality.singleValue);
+			PublishUpdate publishSwitchGroup = Requests.createPublishUpdate(
+					extIdOpenflowGroup,devController,controllerMemberOfGroup,MetadataLifetime.session);
+			ssrc.publish(Requests.createPublishReq(publishSwitchGroup));	
+			
 			
 			rootNode = mapper.readValue(jsonString, JsonNode.class);		
 			
@@ -90,16 +115,25 @@ public class RequestSwitchList extends RequestStrategy {
 				if(ipStr.equals("127.0.0.1")){
 					ipStr = Configuration.openFlowControllerIP();
 				}
-				
+				//create ip-switch
 				IpAddress ipSwitch = Identifiers.createIp4(ipStr);				
 				Document switchDevIp = getMetadataFactory().createDevIp();
 				PublishUpdate publishSwitchIp = Requests.createPublishUpdate(
 						devSwitch,ipSwitch,switchDevIp,MetadataLifetime.session);
 				ssrc.publish(Requests.createPublishReq(publishSwitchIp));
 				
+				//create group-switch
+				Document switchMemberOfGroup = getMetadataFactory().create(
+						"member-of",IfmapStrings.STD_METADATA_PREFIX,
+						IRONFLOW_METADATA_NS_URI, Cardinality.singleValue);
+				PublishUpdate publishSwitchMemberOfGroup = Requests.createPublishUpdate(
+						devSwitch,extIdOpenflowGroup,switchMemberOfGroup,MetadataLifetime.session);
+				ssrc.publish(Requests.createPublishReq(publishSwitchMemberOfGroup));	
+					
 				switchesAndIps.put(dpidNode.getTextValue(), ipStr);
 				switchesAndIpsToDelete.remove(dpidNode.getTextValue());
 				
+				// del and create switch characteristics
 		        String filter = String.format(
 		        		"meta:device-characteristic[@ifmap-publisher-id='%s']", ssrc.getPublisherId());
 				PublishDelete del = Requests.createPublishDelete(devSwitch,filter);
@@ -149,6 +183,8 @@ public class RequestSwitchList extends RequestStrategy {
 			throws IfmapErrorResult, IfmapException{
 		
 		Iterator<Entry<String, String>> itrSwitchWithIp = switchesAndIpsToDelete.entrySet().iterator();
+		Identifier extIdOpenflowGroup = Identifiers.createExtendedIdentity(
+				getClass().getResourceAsStream("/openflowGroup.xml"));
 		
 		while(itrSwitchWithIp.hasNext()){
 			Entry<String, String> entrySwitchIp = itrSwitchWithIp.next();
@@ -163,6 +199,13 @@ public class RequestSwitchList extends RequestStrategy {
 	        		IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI);
 	        ssrc.publish(Requests.createPublishReq(delDevIp));
 			
+	        String filterGroupOf = String.format(
+	        		"meta:member-of[@ifmap-publisher-id='%s']", ssrc.getPublisherId());
+			PublishDelete delGroupOf = Requests.createPublishDelete(devSwitch,extIdOpenflowGroup,filterGroupOf);
+			delGroupOf.addNamespaceDeclaration(    		
+	        		IfmapStrings.STD_METADATA_PREFIX, IRONFLOW_METADATA_NS_URI);
+	        ssrc.publish(Requests.createPublishReq(delGroupOf));
+	        
 	        String filterChara = String.format(
 	        		"meta:device-characteristic[@ifmap-publisher-id='%s']", ssrc.getPublisherId());
 			PublishDelete delChara = Requests.createPublishDelete(devSwitch,filterChara);

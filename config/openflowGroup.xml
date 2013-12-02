@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns:OpenflowGroup 	administrative-domain="fehler"
+					xmlns:ns="http://www.example.com/extended-identifiers"
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+					xsi:schemaLocation="http://www.example.com/extended-identifiers example-identifiers-2.1v1.xsd"
+/>
