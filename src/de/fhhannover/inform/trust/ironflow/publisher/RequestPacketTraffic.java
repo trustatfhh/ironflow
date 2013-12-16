@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
@@ -27,9 +28,21 @@ import de.fhhannover.inform.trust.ifmapj.messages.PublishUpdate;
 import de.fhhannover.inform.trust.ifmapj.messages.Requests;
 import de.fhhannover.inform.trust.ifmapj.metadata.EventType;
 import de.fhhannover.inform.trust.ifmapj.metadata.Significance;
+import de.fhhannover.inform.trust.ironflow.Configuration;
+
+/**
+ * This class is the Implementation to Request the OpenflowController for all Packets transferred 
+ * 
+ * 
+ * @author Marius Rohde
+ *
+ */
 
 public class RequestPacketTraffic extends RequestStrategy {
 
+	private HashMap<String, Long> macsAndRxData = new HashMap<String, Long>();
+	private HashMap<String, Long> macsAndTxData = new HashMap<String, Long>();
+	
 	@Override
 	public void requestWebservice(WebTarget webTarget, SSRC ssrc) {
 
@@ -54,18 +67,28 @@ public class RequestPacketTraffic extends RequestStrategy {
 		DateFormat dfmt = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssZ'Z'" );
 		Date now = new Date(System.currentTimeMillis());
 		
+		long expireTime = System.currentTimeMillis() - Configuration.ironflowDeviceExpireTime()*60000;
+		
+		HashMap<String, Long> macsAndRxDataOld = new HashMap<String, Long>();
+		HashMap<String, Long> macsAndTxDataOld = new HashMap<String, Long>();
+		
+		macsAndRxDataOld.putAll(macsAndRxData);
+		macsAndTxDataOld.putAll(macsAndTxData);
+		macsAndRxData.clear();
+		macsAndTxData.clear();
+		
 		try {
 			
 			rootNodeTraffic = mapper.readValue(jsonStringTraffic, JsonNode.class);
 			rootNodeSwitches = mapper.readValue(jsonStringSwitches, JsonNode.class);
-			Iterator<Entry<String, JsonNode>> itrSwitches = rootNodeTraffic.getFields();
+			Iterator<Entry<String, JsonNode>> itrTraffic = rootNodeTraffic.getFields();
 						
-			while(itrSwitches.hasNext()){
-				Entry<String, JsonNode> switchEntry = itrSwitches.next();
+			while(itrTraffic.hasNext()){
+				Entry<String, JsonNode> trafficEntry = itrTraffic.next();
 												
-				JsonNode switchNode = switchEntry.getValue();
+				JsonNode trafficNode = trafficEntry.getValue();
 								
-				for (JsonNode node : switchNode) {
+				for (JsonNode node : trafficNode) {
 					int portNrTraffic = node.path("portNumber").getIntValue();
 					if(portNrTraffic > 0){
 						long rxPackets = node.path("receivePackets").getLongValue();
@@ -75,50 +98,67 @@ public class RequestPacketTraffic extends RequestStrategy {
 							
 							JsonNode nodeMacs = nodeSwitches.path("mac");
 							JsonNode nodeAttachmentPoint = nodeSwitches.path("attachmentPoint");
-														
-							for (JsonNode nodeAttachmentPointItr : nodeAttachmentPoint) {
-								int portNrSwitch = nodeAttachmentPointItr.path("port").getIntValue(); 
-								String dpid = nodeAttachmentPointItr.path("switchDPID").getTextValue();
+							long lastSeen = nodeSwitches.path("lastSeen").getLongValue();		
 
-								if(portNrTraffic == portNrSwitch && dpid.equals(switchEntry.getKey())){
-									System.out.println(portNrSwitch+" - "+ portNrTraffic);
-									System.out.println(dpid+" - "+switchEntry.getKey());
-																		
-									for (JsonNode nodeMacItr : nodeMacs) {					
-
-										MacAddress macHost = Identifiers.createMac(nodeMacItr.getTextValue());
-										
-										String filterTXRXEvents = String.format(
-												"meta:event[@ifmap-publisher-id='%s']", ssrc.getPublisherId());
-										PublishDelete delTXRXEvents = Requests.createPublishDelete(macHost,filterTXRXEvents);
-										delTXRXEvents.addNamespaceDeclaration(    		
-									        	IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI);
-									    ssrc.publish(Requests.createPublishReq(delTXRXEvents));
-										
-										Document eventTxMac = getMetadataFactory().createEvent(
-												"Test", dfmt.format(now), ssrc.getPublisherId(), 1,
-												100, Significance.informational, EventType.p2p, "",
-												"TxPackets: "+ txPackets, "");
-										PublishUpdate publishEventTxMac = Requests.createPublishUpdate(
-												macHost,eventTxMac,MetadataLifetime.session);
-										ssrc.publish(Requests.createPublishReq(publishEventTxMac));
-										
-										Document eventRxMac = getMetadataFactory().createEvent(
-												"Test", dfmt.format(now), ssrc.getPublisherId(), 1,
-												100, Significance.informational, EventType.p2p, "",
-												"RxPackets: "+ rxPackets, "");
-										PublishUpdate publishEventRxMac = Requests.createPublishUpdate(
-												macHost,eventRxMac,MetadataLifetime.session);
-										ssrc.publish(Requests.createPublishReq(publishEventRxMac));
-										
-									}	
-									
-								}
-								
-							}						
-							
-						}
-						
+							if(lastSeen >= expireTime){
+								for (JsonNode nodeAttachmentPointItr : nodeAttachmentPoint) {
+									int portNrSwitch = nodeAttachmentPointItr.path("port").getIntValue(); 
+									String dpid = nodeAttachmentPointItr.path("switchDPID").getTextValue();
+	
+									if(portNrTraffic == portNrSwitch && dpid.equals(trafficEntry.getKey())){
+										//System.out.println(portNrSwitch+" - "+ portNrTraffic);
+										//System.out.println(dpid+" - "+trafficEntry.getKey());
+																			
+										for (JsonNode nodeMacItr : nodeMacs) {					
+	
+											MacAddress macHost = Identifiers.createMac(nodeMacItr.getTextValue());
+											
+											macsAndRxData.put(nodeMacItr.getTextValue(), rxPackets);
+											macsAndTxData.put(nodeMacItr.getTextValue(), txPackets);
+											
+											// Delete Events is Lifetime is session could be modified to notify Update
+											// then you dont need to delete events
+											String filterTXRXEvents = String.format(
+													"meta:event[@ifmap-publisher-id='%s']", ssrc.getPublisherId());
+											PublishDelete delTXRXEvents = Requests.createPublishDelete(
+													macHost,filterTXRXEvents);
+											delTXRXEvents.addNamespaceDeclaration(    		
+										        	IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI);
+										    ssrc.publish(Requests.createPublishReq(delTXRXEvents));
+											
+										    //Transmitted packets per interval
+										    long txPacketsInterval = 0;
+										    if(macsAndTxDataOld.containsKey(nodeMacItr.getTextValue())){
+											    txPacketsInterval = txPackets - macsAndTxDataOld.get(
+											    		nodeMacItr.getTextValue());
+										    }
+											Document eventTxMac = getMetadataFactory().createEvent(
+													"TxTraffic", dfmt.format(now), ssrc.getPublisherId(), 1,
+													100, Significance.informational, EventType.p2p, "",
+													"TxPackets: "+ txPacketsInterval, "");
+											PublishUpdate publishEventTxMac = Requests.createPublishUpdate(
+													macHost,eventTxMac,MetadataLifetime.session);
+											ssrc.publish(Requests.createPublishReq(publishEventTxMac));
+											
+											//Recieved packets per interval
+										    long rxPacketsInterval = 0;
+										    if(macsAndRxDataOld.containsKey(nodeMacItr.getTextValue())){
+											    rxPacketsInterval = rxPackets - macsAndRxDataOld.get(
+											    		nodeMacItr.getTextValue());
+										    }
+											Document eventRxMac = getMetadataFactory().createEvent(
+													"RxTraffic", dfmt.format(now), ssrc.getPublisherId(), 1,
+													100, Significance.informational, EventType.p2p, "",
+													"RxPackets: "+ rxPacketsInterval, "");
+											PublishUpdate publishEventRxMac = Requests.createPublishUpdate(
+													macHost,eventRxMac,MetadataLifetime.session);
+											ssrc.publish(Requests.createPublishReq(publishEventRxMac));
+											
+										}	
+									}
+								}	
+							}							
+						}						
 					}					
 				}				
 			}
