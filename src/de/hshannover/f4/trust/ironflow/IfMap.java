@@ -1,4 +1,6 @@
-package de.fhhannover.inform.trust.ironflow;
+package de.hshannover.f4.trust.ironflow;
+
+import java.util.logging.Logger;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
@@ -14,6 +16,8 @@ public class IfMap {
 	 */
 	private static SSRC ifmapSSRC = null;
 	
+	private static final Logger logger = Logger.getLogger(IfMap.class.getName());
+	
 	   /**
      * Creates a {@link SSRC} instance with the given configuration parameters.
      *
@@ -24,7 +28,7 @@ public class IfMap {
      * @param pass
      * @param keypath
      * @param keypass
-     * @return
+     * @return SSRC
      */
     public static SSRC initSSRC(String authMethod, String basicUrl,
             String certUrl, String user, String pass, String keypath,
@@ -39,7 +43,8 @@ public class IfMap {
             km = IfmapJHelper.getKeyManagers(
             		Ironflow.class.getResourceAsStream(keypath), keypass);
         } catch (InitializationException e1) {
-            e1.printStackTrace();
+        	
+            logger.severe("could not read the security informations for the trust- and key- managers: " + e1);
             System.exit(1);
         }
 
@@ -53,7 +58,7 @@ public class IfMap {
                         "unknown authentication method '" + authMethod + "'");
             }
         } catch (InitializationException e) {
-            e.printStackTrace();
+        	logger.severe("could not read the security informations for basic or cert authentication: " + e);
             System.exit(1);
         }
         

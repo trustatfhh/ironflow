@@ -1,4 +1,4 @@
-package de.fhhannover.inform.trust.ironflow.publisher;
+package de.hshannover.f4.trust.ironflow.publisher;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import javax.ws.rs.client.WebTarget;
 
@@ -28,7 +29,7 @@ import de.fhhannover.inform.trust.ifmapj.messages.PublishUpdate;
 import de.fhhannover.inform.trust.ifmapj.messages.Requests;
 import de.fhhannover.inform.trust.ifmapj.metadata.EventType;
 import de.fhhannover.inform.trust.ifmapj.metadata.Significance;
-import de.fhhannover.inform.trust.ironflow.Configuration;
+import de.hshannover.f4.trust.ironflow.Configuration;
 
 /**
  * This class is the Implementation to Request the OpenflowController for all Packets transferred 
@@ -40,6 +41,11 @@ import de.fhhannover.inform.trust.ironflow.Configuration;
 
 public class RequestPacketTraffic extends RequestStrategy {
 
+	private static final Logger logger = Logger.getLogger(RequestPacketTraffic.class.getName());
+	
+	
+	
+	// packet count received and transmitted
 	private HashMap<String, Long> macsAndRxData = new HashMap<String, Long>();
 	private HashMap<String, Long> macsAndTxData = new HashMap<String, Long>();
 	
@@ -61,8 +67,11 @@ public class RequestPacketTraffic extends RequestStrategy {
 				
 		jsonStringTraffic = this.getResponse(resourceWebTargetTraffic).readEntity(String.class);
 		jsonStringSwitches = this.getResponse(resourceWebTargetDevices).readEntity(String.class);
-		System.out.println(jsonStringTraffic);	
-		//System.out.println(jsonStringSwitches);	
+		
+		
+		logger.fine("json traffic response string:" + jsonStringTraffic);
+		logger.finer("json devices response string:" + jsonStringSwitches);
+
 		
 		DateFormat dfmt = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssZ'Z'" );
 		Date now = new Date(System.currentTimeMillis());
@@ -74,6 +83,8 @@ public class RequestPacketTraffic extends RequestStrategy {
 		
 		macsAndRxDataOld.putAll(macsAndRxData);
 		macsAndTxDataOld.putAll(macsAndTxData);
+		
+		//clear Rx and Tx count to fill it witch the new data 
 		macsAndRxData.clear();
 		macsAndTxData.clear();
 		
@@ -106,8 +117,6 @@ public class RequestPacketTraffic extends RequestStrategy {
 									String dpid = nodeAttachmentPointItr.path("switchDPID").getTextValue();
 	
 									if(portNrTraffic == portNrSwitch && dpid.equals(trafficEntry.getKey())){
-										//System.out.println(portNrSwitch+" - "+ portNrTraffic);
-										//System.out.println(dpid+" - "+trafficEntry.getKey());
 																			
 										for (JsonNode nodeMacItr : nodeMacs) {					
 	
@@ -116,6 +125,7 @@ public class RequestPacketTraffic extends RequestStrategy {
 											macsAndRxData.put(nodeMacItr.getTextValue(), rxPackets);
 											macsAndTxData.put(nodeMacItr.getTextValue(), txPackets);
 											
+											//TODO
 											// Delete Events is Lifetime is session could be modified to notify Update
 											// then you dont need to delete events
 											String filterTXRXEvents = String.format(
@@ -164,20 +174,15 @@ public class RequestPacketTraffic extends RequestStrategy {
 			}
 
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.severe("RequestPacketTraffic: "+e);
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.severe("RequestPacketTraffic: "+e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.severe("RequestPacketTraffic: "+e);
 		} catch (IfmapErrorResult e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.severe("RequestPacketTraffic: "+e);
 		} catch (IfmapException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.severe("RequestPacketTraffic: "+e);
 		}
 		
 		

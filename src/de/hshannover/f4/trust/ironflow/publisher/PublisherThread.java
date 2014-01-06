@@ -1,4 +1,4 @@
-package de.fhhannover.inform.trust.ironflow.publisher;
+package de.hshannover.f4.trust.ironflow.publisher;
 
 import java.util.TimerTask;
 
@@ -9,12 +9,12 @@ import javax.ws.rs.client.WebTarget;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
-import de.fhhannover.inform.trust.ironflow.Configuration;
-import de.fhhannover.inform.trust.ironflow.IfMap;
+import de.hshannover.f4.trust.ironflow.Configuration;
+import de.hshannover.f4.trust.ironflow.IfMap;
 
 /**
- * This class looks for the different REST Request types in the list 
- * and calls the Function in the RequestStrategies to request the Webserver
+ * This class looks for the different REST request types in the list 
+ * and calls the function in the RequestStrategies to request the webserver
  *  
  * @author Marius Rohde
  *
@@ -24,13 +24,13 @@ import de.fhhannover.inform.trust.ironflow.IfMap;
 public class PublisherThread extends TimerTask{
 
 	/**
-	 * This Methode calls the requestWebservice Methode of all Request Strategies in the RequestChain 
+	 * This method calls the requestWebservice method of all Request Strategies in the RequestChain 
 	 * and defines the serverconnection to the OpenflowController
 	 */
 	
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
+
 		RequestStrategy request;
 		 
 		Client client = ClientBuilder.newClient(new ClientConfig().register(JacksonFeature.class));

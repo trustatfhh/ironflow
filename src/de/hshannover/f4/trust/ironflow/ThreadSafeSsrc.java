@@ -1,4 +1,4 @@
-package de.fhhannover.inform.trust.ironflow;
+package de.hshannover.f4.trust.ironflow;
 
 
 import javax.net.ssl.KeyManager;

@@ -1,11 +1,11 @@
-package de.fhhannover.inform.trust.ironflow.publisher;
+package de.hshannover.f4.trust.ironflow.publisher;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import de.fhhannover.inform.trust.ironflow.Configuration;
+import de.hshannover.f4.trust.ironflow.Configuration;
 
 /**
  * This class initialise the Request chain to Request the OpenflowController over the REST API.
@@ -24,10 +24,10 @@ public class RequestChainBuilder {
     /**
      * The package path to the strategy classes.
      */	    
-	private static final String PACKAGE_PATH = "de.fhhannover.inform.trust.ironflow.publisher.";
+	private static final String PACKAGE_PATH = "de.hshannover.f4.trust.ironflow.publisher.";
 	
 	/**
-     * the List/Chain with the different strategyobjects
+     * the List/Chain with the different strategy objects
      */	
 	private static ArrayList<RequestStrategy> requestChain;
 	
@@ -37,7 +37,7 @@ public class RequestChainBuilder {
 	
 	public static void init(){
 		
-		logger.info("RequestChainBuilder : looking for classes in package" + PACKAGE_PATH );
+		logger.info("RequestChainBuilder : looking for classes in package " + PACKAGE_PATH );
 		
 		RequestStrategy request;
 		Iterator<Entry<Object, Object>> iteClassnames = Configuration.getClassnameMap().iterator();
@@ -74,21 +74,14 @@ public class RequestChainBuilder {
 			 logger.info("RequestChainBuilder : " + cl.toString() + " instantiated" );
 			 if(cl.getSuperclass() == RequestStrategy.class ){
 				 request = (RequestStrategy) cl.newInstance(); 
-				 
 			 }			
 			 
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			logger.severe("RequestChainBuilder : ClassNotFound");
-			//e.printStackTrace();
+			logger.severe("RequestChainBuilder: ClassNotFound");
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			logger.severe("RequestChainBuilder : InstantiationException");
-			//e.printStackTrace();
+			logger.severe("RequestChainBuilder: InstantiationException");
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			logger.severe("RequestChainBuilder : IllegalAccessException");
-			//e.printStackTrace();
+			logger.severe("RequestChainBuilder: IllegalAccessException");
 		}
 		
 		return request;		

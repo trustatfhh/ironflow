@@ -1,4 +1,4 @@
-package de.fhhannover.inform.trust.ironflow.publisher;
+package de.hshannover.f4.trust.ironflow.publisher;
 
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;

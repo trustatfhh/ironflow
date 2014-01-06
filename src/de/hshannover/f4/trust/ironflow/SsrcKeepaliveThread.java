@@ -1,4 +1,4 @@
-package de.fhhannover.inform.trust.ironflow;
+package de.hshannover.f4.trust.ironflow;
 
 import java.util.TimerTask;
 import java.util.logging.Logger;

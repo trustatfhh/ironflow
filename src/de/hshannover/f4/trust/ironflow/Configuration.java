@@ -1,5 +1,5 @@
 
-package de.fhhannover.inform.trust.ironflow;
+package de.hshannover.f4.trust.ironflow;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -92,7 +92,7 @@ public class Configuration {
 	            try {
 	                in.close();
 	            } catch (IOException e) {
-	                e.printStackTrace();
+	            	logger.warning("error while closing properties inputstream: " + e);
 	            }
 	        }
 	    }

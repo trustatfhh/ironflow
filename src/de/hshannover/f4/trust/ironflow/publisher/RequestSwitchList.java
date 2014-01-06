@@ -1,4 +1,4 @@
-package de.fhhannover.inform.trust.ironflow.publisher;
+package de.hshannover.f4.trust.ironflow.publisher;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import javax.ws.rs.client.WebTarget;
 
@@ -29,7 +30,7 @@ import de.fhhannover.inform.trust.ifmapj.messages.PublishDelete;
 import de.fhhannover.inform.trust.ifmapj.messages.PublishUpdate;
 import de.fhhannover.inform.trust.ifmapj.messages.Requests;
 import de.fhhannover.inform.trust.ifmapj.metadata.Cardinality;
-import de.fhhannover.inform.trust.ironflow.Configuration;
+import de.hshannover.f4.trust.ironflow.Configuration;
 
 
 /**
@@ -43,6 +44,8 @@ import de.fhhannover.inform.trust.ironflow.Configuration;
 public class RequestSwitchList extends RequestStrategy {
 
 	public static final String IRONFLOW_METADATA_NS_URI =  "http://trust.f4.hs-hannover.de/ironflow";
+	
+	private static final Logger logger = Logger.getLogger(RequestSwitchList.class.getName());
 	
 	private HashMap<String, String> switchesAndIps = new HashMap<String, String>();
 	
@@ -62,7 +65,7 @@ public class RequestSwitchList extends RequestStrategy {
 		switchesAndIps.clear();
 		
 		jsonString = this.getResponse(resourceWebTarget).readEntity(String.class);
-		System.out.println(jsonString);		
+		logger.fine("json switchlist response string");
 		
 		try {
 			
@@ -160,20 +163,15 @@ public class RequestSwitchList extends RequestStrategy {
 			
 						
 		} catch (IfmapErrorResult e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.severe("RequestSwitchList: "+e);
 		} catch (IfmapException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.severe("RequestSwitchList: "+e);
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.severe("RequestSwitchList: "+e);
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.severe("RequestSwitchList: "+e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.severe("RequestSwitchList: "+e);
 		}	
 
 	}
