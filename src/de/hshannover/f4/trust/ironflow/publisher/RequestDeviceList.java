@@ -154,7 +154,9 @@ public class RequestDeviceList extends RequestStrategy {
 		
 	}
 
-	//Helper
+	/**
+	 * This helper method fills the mac adresses of the rest response in an arraylist of IFMAP mac adresses
+	 */	
 	private ArrayList<MacAddress> fillMacArrayList(JsonNode node){
 	
 		ArrayList<MacAddress> macs = new ArrayList<MacAddress>();
@@ -166,7 +168,9 @@ public class RequestDeviceList extends RequestStrategy {
 		return macs;		
 	}
 	
-	//Helper
+	/**
+	 * This helper method fills the ip adresses of the rest response in an arraylist of IFMAP ip adresses
+	 */
 	private ArrayList<IpAddress> fillIpArrayList(JsonNode node){
 		
 		ArrayList<IpAddress> ips = new ArrayList<IpAddress>();
@@ -178,7 +182,9 @@ public class RequestDeviceList extends RequestStrategy {
 		return ips;		
 	}
 	
-	//Helper
+	/**
+	 * This helper method fills the vlan numbers of the rest response in an integer arraylist
+	 */
 	private ArrayList<Integer> fillVlanArrayList(JsonNode node){
 		
 		ArrayList<Integer> vlans = new ArrayList<Integer>();
@@ -190,7 +196,9 @@ public class RequestDeviceList extends RequestStrategy {
 		return vlans;			
 	}
 	
-	//Helper
+	/**
+	 * This helper method fills the dpid numbers of the rest response in an arraylist of IFMAP devices
+	 */
 	private ArrayList<Device> fillDeviceArrayList(JsonNode node){
 		
 		ArrayList<Device> devices = new ArrayList<Device>();
@@ -202,7 +210,9 @@ public class RequestDeviceList extends RequestStrategy {
 		return devices;		
 	}
 	
-	//Helper
+	/**
+	 * This helper method fills the port numbers of the rest response in an interger arraylist 
+	 */
 	private ArrayList<Integer> fillPortArrayList(JsonNode node){
 		
 		ArrayList<Integer> ports = new ArrayList<Integer>();
@@ -214,7 +224,9 @@ public class RequestDeviceList extends RequestStrategy {
 		return ports;		
 	}
 	
-	//Helper
+	/**
+	 * This helper method deletes double ip-mac and discovered-by metadata and creates new ones
+	 */
 	private void updateDeleteIps(
 			SSRC ssrc,
 			ArrayList<Device> devicesNew,
@@ -251,7 +263,9 @@ public class RequestDeviceList extends RequestStrategy {
 		
 	}
 	
-	//Helper
+	/**
+	* This helper method deletes double vlan numbers (layer2) metadata and creates new ones
+	*/
 	private void updateDeleteVlans(
 			SSRC ssrc,
 			ArrayList<Device> devicesNew,
@@ -300,7 +314,9 @@ public class RequestDeviceList extends RequestStrategy {
 
 	}
 	
-	//Helper
+	/**
+	* This helper method deletes old ip-mac and discovered-by metadata
+	*/
 	private void deleteIps(
 			SSRC ssrc,
 			ArrayList<Device> devicesOld,
@@ -330,7 +346,9 @@ public class RequestDeviceList extends RequestStrategy {
 	
 	}
 
-	//Helper
+	/**
+	* This helper method deletes old layer 2 metadata
+	*/
 	private void deleteVlans(
 			SSRC ssrc,
 			ArrayList<Device> devicesOld,

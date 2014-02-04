@@ -176,6 +176,9 @@ public class RequestSwitchList extends RequestStrategy {
 
 	}
 	
+	/**
+	* This helper method deletes old switch devices-ip, member-of and device-characteristic metadata
+	*/	
 	private void deleteDeviceSwitchAndMetaData(
 			SSRC ssrc, HashMap<String, String> switchesAndIpsToDelete)
 			throws IfmapErrorResult, IfmapException{

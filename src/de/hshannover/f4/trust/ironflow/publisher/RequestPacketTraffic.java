@@ -32,7 +32,7 @@ import de.fhhannover.inform.trust.ifmapj.metadata.Significance;
 import de.hshannover.f4.trust.ironflow.Configuration;
 
 /**
- * This class is the Implementation to Request the OpenflowController for all Packets transferred 
+ * This class is the implementation to request the OpenflowController for all packets transferred 
  * 
  * 
  * @author Marius Rohde
