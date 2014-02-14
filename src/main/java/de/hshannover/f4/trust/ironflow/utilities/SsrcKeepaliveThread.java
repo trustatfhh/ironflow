@@ -36,7 +36,7 @@
  * limitations under the License.
  * #L%
  */
-package de.hshannover.f4.trust.ironflow;
+package de.hshannover.f4.trust.ironflow.utilities;
 
 import java.util.TimerTask;
 import java.util.logging.Logger;

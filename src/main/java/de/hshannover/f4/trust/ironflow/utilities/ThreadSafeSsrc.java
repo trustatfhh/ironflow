@@ -36,7 +36,7 @@
  * limitations under the License.
  * #L%
  */
-package de.hshannover.f4.trust.ironflow;
+package de.hshannover.f4.trust.ironflow.utilities;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;

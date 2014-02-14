@@ -36,7 +36,7 @@
  * limitations under the License.
  * #L%
  */
-package de.hshannover.f4.trust.ironflow;
+package de.hshannover.f4.trust.ironflow.utilities;
 
 import java.util.logging.Logger;
 
@@ -44,8 +44,10 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
 
 import de.fhhannover.inform.trust.ifmapj.IfmapJHelper;
+import de.fhhannover.inform.trust.ifmapj.channel.ARC;
 import de.fhhannover.inform.trust.ifmapj.channel.SSRC;
 import de.fhhannover.inform.trust.ifmapj.exception.InitializationException;
+import de.hshannover.f4.trust.ironflow.Ironflow;
 
 public final class IfMap {
 
@@ -108,6 +110,21 @@ public final class IfMap {
 
 	public static SSRC getSsrc() {
 		return ifmapSsrc;
+	}
+
+	/**
+	 * get A ARC
+	 * 
+	 * @return a ARC or System exit
+	 */
+	public static ARC getArc() {
+		try {
+			return ifmapSsrc.getArc();
+		} catch (InitializationException e) {
+			LOGGER.severe("could not establish the arc channel: " + e);
+			System.exit(1);
+		}
+		return null;
 	}
 
 }

@@ -50,6 +50,9 @@ import java.util.logging.Logger;
 
 import de.hshannover.f4.trust.ironflow.publisher.PublisherThread;
 import de.hshannover.f4.trust.ironflow.publisher.RequestChainBuilder;
+import de.hshannover.f4.trust.ironflow.subscriber.SubscriberThread;
+import de.hshannover.f4.trust.ironflow.utilities.IfMap;
+import de.hshannover.f4.trust.ironflow.utilities.SsrcKeepaliveThread;
 
 /**
  * This class starts the application It creates the threads for publishing,
@@ -98,8 +101,9 @@ public final class Ironflow {
 
 		Timer timer = new Timer();
 
-		timer.schedule(new PublisherThread(), 2000, Configuration.openFlowControllerPollingInterval() * 1000);
 		timer.schedule(new SsrcKeepaliveThread(), 1000, Configuration.ifmapKeepalive() * 1000);
+		timer.schedule(new PublisherThread(), 2000, Configuration.openFlowControllerPollingInterval() * 1000);
+		// timer.schedule(new SubscriberThread(), 3000);
 
 		// TODO parameter for application control
 

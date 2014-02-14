@@ -48,7 +48,7 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
 import de.hshannover.f4.trust.ironflow.Configuration;
-import de.hshannover.f4.trust.ironflow.IfMap;
+import de.hshannover.f4.trust.ironflow.utilities.IfMap;
 
 /**
  * This class looks for the different REST request types in the list and calls
