@@ -1,3 +1,41 @@
+/*
+ * #%L
+ * =====================================================
+ *   _____                _     ____  _   _       _   _
+ *  |_   _|_ __ _   _ ___| |_  / __ \| | | | ___ | | | |
+ *    | | | '__| | | / __| __|/ / _` | |_| |/ __|| |_| |
+ *    | | | |  | |_| \__ \ |_| | (_| |  _  |\__ \|  _  |
+ *    |_| |_|   \__,_|___/\__|\ \__,_|_| |_||___/|_| |_|
+ *                             \____/
+ * 
+ * =====================================================
+ * 
+ * Hochschule Hannover
+ * (University of Applied Sciences and Arts, Hannover)
+ * Faculty IV, Dept. of Computer Science
+ * Ricklinger Stadtweg 118, 30459 Hannover, Germany
+ * 
+ * Email: trust@f4-i.fh-hannover.de
+ * Website: http://trust.f4.hs-hannover.de
+ * 
+ * This file is part of ironflow, version 0.0.1, implemented by the Trust@HsH
+ * research group at the Hochschule Hannover.
+ * %%
+ * Copyright (C) 2013 - 2014 Trust@HsH
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 package de.hshannover.f4.trust.ironflow;
 
@@ -9,171 +47,259 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 
-
 /**
  * This class loads the configuration file from the file system and provides a
  * set of constants and a getter method to access these values.
- *
+ * 
  * @author Marius Rohde
- *
+ * 
  */
 
-public class Configuration {
+public final class Configuration {
 
-	   private static final Logger logger = Logger.getLogger(Configuration.class
-	            .getName());
+	private static final Logger LOGGER = Logger.getLogger(Configuration.class.getName());
 
-	    /**
-	     * The path to the configuration file.
-	     */	    
-	   
-	    private static final String CONFIG_FILE = "/ironflow.properties";
+	/**
+	 * The path to the configuration file.
+	 */
 
-	    private static Properties properties;
+	private static final String CONFIG_FILE = "/ironflow.properties";
 
-	    private static Properties classnamesForRequestStrategie;
-	    
-	    // begin configuration parameter -------------------------------------------
+	private static Properties mProperties;
 
-	    private static final String IFMAP_AUTH_METHOD = "ifmap.server.auth.method";
-	    private static final String IFMAP_URL_BASIC = "ifmap.server.url.basic";
-	    private static final String IFMAP_URL_CERT = "ifmap.server.url.cert";
-	    private static final String IFMAP_BASIC_USER = "ifmap.server.auth.basic.user";
-	    private static final String IFMAP_BASIC_PASSWORD = "ifmap.server.auth.basic.password";
-	    
-	    private static final String KEYSTORE_PATH = "keystore.path";
-	    private static final String KEYSTORE_PASSWORD = "keystore.password";
-	    
-	    private static final String IFMAP_KEEPALIVE = "ironflow.ifmap.interval";
+	private static Properties mClassnamesForRequestStrategie;
 
-	    private static final String OPENFLOW_CONTROLLER_IP = "openflow.controller.ip";
-	    private static final String OPENFLOW_CONTROLLER_PORT = "openflow.controller.port";
-	    
-	    //publisher	    
-	    private static final String OPENFLOW_CONTROLLER_POLL_INTERVAL = "ironflow.poll.interval";
-	    private static final String OPENFLOW_CLASSNAME_PROPERTIES_FILENAME = "ironflow.requeststrategies.publisher";
-	    private static final String IRONFLOW_DEVICE_EXPIRE_TIME = "ironflow.device.expire.time";
-	    
-	    
-	    // subscriber
-	    private static final String SUBSCRIBER_PDP = "ironflow.subscriber.pdp";
+	// begin configuration parameter -------------------------------------------
 
-	    // end configuration parameter ---------------------------------------------
+	private static final String IFMAP_AUTH_METHOD = "ifmap.server.auth.method";
+	private static final String IFMAP_URL_BASIC = "ifmap.server.url.basic";
+	private static final String IFMAP_URL_CERT = "ifmap.server.url.cert";
+	private static final String IFMAP_BASIC_USER = "ifmap.server.auth.basic.user";
+	private static final String IFMAP_BASIC_PASSWORD = "ifmap.server.auth.basic.password";
 
-	    /**
-	     * Loads the configuration file. Every time this method is called the file
-	     * is read again.
-	     */
-	    public static void init() {
-	        logger.info("reading " + CONFIG_FILE + " ...");
-	        
-	        properties = new Properties();
-	        classnamesForRequestStrategie = new Properties();
-	        
-	        InputStream in = Configuration.class.getResourceAsStream(CONFIG_FILE);
-	        loadPropertiesfromFile(in, properties);
-	        
-	        in = Configuration.class.getResourceAsStream("/"+openflowClassnamePropertiesFilename());
-	        loadPropertiesfromFile(in, classnamesForRequestStrategie);
-	        
-	    }
-	    
-	    private static void loadPropertiesfromFile(InputStream in, Properties props){
-	        
-	    	try {
-	    		props.load(in);
-	        } catch (FileNotFoundException e) {
-	            logger.severe("could not find " + CONFIG_FILE);
-	            throw new RuntimeException(e.getMessage());
-	        } catch (IOException e) {
-	            logger.severe("error while reading " + CONFIG_FILE);
-	            throw new RuntimeException(e.getMessage());
-	        } finally {
-	            try {
-	                in.close();
-	            } catch (IOException e) {
-	            	logger.warning("error while closing properties inputstream: " + e);
-	            }
-	        }
-	    }
+	private static final String KEYSTORE_PATH = "keystore.path";
+	private static final String KEYSTORE_PASSWORD = "keystore.password";
 
-	    /**
-	     * Returns the value assigned to the given key. If the configuration has not
-	     * been loaded jet this method loads it.
-	     *
-	     * @param key
-	     * @return the value assigned to key or null if the is none
-	     */
-	    private static String get(String key) {
-	        if (properties == null) {
-	            init();
-	        }
-	        return properties.getProperty(key);
-	    }
+	private static final String IFMAP_KEEPALIVE = "ironflow.ifmap.interval";
 
-	    public static Set<Entry<Object, Object>> getClassnameMap() {
-	        if (classnamesForRequestStrategie == null) {
-	            init();
-	        }
-	        return classnamesForRequestStrategie.entrySet();
-	    }
-	    
-	    
-	    public static String ifmapAuthMethod() {
-	        return get(IFMAP_AUTH_METHOD);
-	    }
+	private static final String OPENFLOW_CONTROLLER_IP = "openflow.controller.ip";
+	private static final String OPENFLOW_CONTROLLER_PORT = "openflow.controller.port";
 
-	    public static String ifmapUrlBasic() {
-	        return get(IFMAP_URL_BASIC);
-	    }
+	// publisher
+	private static final String OPENFLOW_CONTROLLER_POLL_INTERVAL = "ironflow.poll.interval";
+	private static final String OPENFLOW_CLASSNAME_PROPERTIES_FILENAME = "ironflow.requeststrategies.publisher";
+	private static final String IRONFLOW_DEVICE_EXPIRE_TIME = "ironflow.device.expire.time";
 
-	    public static String ifmapUrlCert() {
-	        return get(IFMAP_URL_CERT);
-	    }
+	// subscriber
+	private static final String SUBSCRIBER_PDP = "ironflow.subscriber.pdp";
 
-	    public static String ifmapBasicUser() {
-	        return get(IFMAP_BASIC_USER);
-	    }
+	// end configuration parameter ---------------------------------------------
 
-	    public static String ifmapBasicPassword() {
-	        return get(IFMAP_BASIC_PASSWORD);
-	    }
+	/**
+	 * Death constructor for code convention -> final class because utility
+	 * class
+	 */
+	private Configuration() {
+	}
 
-	    public static String keyStorePath() {
-	        return get(KEYSTORE_PATH);
-	    }
+	/**
+	 * Loads the configuration file. Every time this method is called the file
+	 * is read again.
+	 */
+	public static void init() {
+		LOGGER.info("reading " + CONFIG_FILE + " ...");
 
-	    public static String keyStorePassword() {
-	        return get(KEYSTORE_PASSWORD);
-	    }
+		mProperties = new Properties();
+		mClassnamesForRequestStrategie = new Properties();
 
-	    public static String openFlowControllerIP() {
-	        return get(OPENFLOW_CONTROLLER_IP);
-	    }
+		InputStream in = Configuration.class.getResourceAsStream(CONFIG_FILE);
+		loadPropertiesfromFile(in, mProperties);
 
-	    public static int openFlowControllerPort() {
-	        return Integer.parseInt(get(OPENFLOW_CONTROLLER_PORT));
-	    }
+		in = Configuration.class.getResourceAsStream("/" + openflowClassnamePropertiesFilename());
+		loadPropertiesfromFile(in, mClassnamesForRequestStrategie);
 
-	    public static int openFlowControllerPollingInterval() {
-	        return Integer.parseInt(get(OPENFLOW_CONTROLLER_POLL_INTERVAL));
-	    }
-	    
-	    public static int ironflowDeviceExpireTime() {
-	        return Integer.parseInt(get(IRONFLOW_DEVICE_EXPIRE_TIME));
-	    }
-	    
-	    public static String openflowClassnamePropertiesFilename() {
-	        return get(OPENFLOW_CLASSNAME_PROPERTIES_FILENAME);
-	    }
-	    
-	    public static int ifmapKeepalive() {
-	        return Integer.parseInt(get(IFMAP_KEEPALIVE));
-	    }
-	    
-	    public static String subscriberPdp() {
-	        return get(SUBSCRIBER_PDP);
-	    }
-	 
-	
+	}
+
+	/**
+	 * Loads the configuration file. Every time this method is called the file
+	 * is read again.
+	 * 
+	 * @param in
+	 *            Streamreader
+	 * @param props
+	 *            properties
+	 * 
+	 */
+	private static void loadPropertiesfromFile(InputStream in, Properties props) {
+
+		try {
+			props.load(in);
+		} catch (FileNotFoundException e) {
+			LOGGER.severe("could not find " + CONFIG_FILE);
+			throw new RuntimeException(e.getMessage());
+		} catch (IOException e) {
+			LOGGER.severe("error while reading " + CONFIG_FILE);
+			throw new RuntimeException(e.getMessage());
+		} finally {
+			try {
+				in.close();
+			} catch (IOException e) {
+				LOGGER.warning("error while closing properties inputstream: " + e);
+			}
+		}
+	}
+
+	/**
+	 * Returns the value assigned to the given key. If the configuration has not
+	 * been loaded jet this method loads it.
+	 * 
+	 * @param key
+	 * @return the value assigned to key or null if it is none
+	 */
+	private static String get(String key) {
+		if (mProperties == null) {
+			init();
+		}
+		return mProperties.getProperty(key);
+	}
+
+	/**
+	 * Getter for the classname map.
+	 * 
+	 * @return the set of classnames for request strategies
+	 */
+	public static Set<Entry<Object, Object>> getClassnameMap() {
+		if (mClassnamesForRequestStrategie == null) {
+			init();
+		}
+		return mClassnamesForRequestStrategie.entrySet();
+	}
+
+	/**
+	 * Getter for the ifmapAuthMethod property.
+	 * 
+	 * @return property string
+	 */
+	public static String ifmapAuthMethod() {
+		return get(IFMAP_AUTH_METHOD);
+	}
+
+	/**
+	 * Getter for the ifmapUrlBasic property.
+	 * 
+	 * @return property string
+	 */
+	public static String ifmapUrlBasic() {
+		return get(IFMAP_URL_BASIC);
+	}
+
+	/**
+	 * Getter for the ifmapUrlCert property.
+	 * 
+	 * @return property string
+	 */
+	public static String ifmapUrlCert() {
+		return get(IFMAP_URL_CERT);
+	}
+
+	/**
+	 * Getter for the ifmapBasicUser property.
+	 * 
+	 * @return property string
+	 */
+	public static String ifmapBasicUser() {
+		return get(IFMAP_BASIC_USER);
+	}
+
+	/**
+	 * Getter for the ifmapBasicPassword property.
+	 * 
+	 * @return property string
+	 */
+	public static String ifmapBasicPassword() {
+		return get(IFMAP_BASIC_PASSWORD);
+	}
+
+	/**
+	 * Getter for the keyStorePath property.
+	 * 
+	 * @return property string
+	 */
+	public static String keyStorePath() {
+		return get(KEYSTORE_PATH);
+	}
+
+	/**
+	 * Getter for the keyStorePassword property.
+	 * 
+	 * @return property string
+	 */
+	public static String keyStorePassword() {
+		return get(KEYSTORE_PASSWORD);
+	}
+
+	/**
+	 * Getter for the openFlowControllerIP property.
+	 * 
+	 * @return property string
+	 */
+	public static String openFlowControllerIp() {
+		return get(OPENFLOW_CONTROLLER_IP);
+	}
+
+	/**
+	 * Getter for the openFlowControllerPort property.
+	 * 
+	 * @return property integer
+	 */
+
+	public static int openFlowControllerPort() {
+		return Integer.parseInt(get(OPENFLOW_CONTROLLER_PORT));
+	}
+
+	/**
+	 * Getter for the openFlowControllerPollingInterval property.
+	 * 
+	 * @return property integer
+	 */
+	public static int openFlowControllerPollingInterval() {
+		return Integer.parseInt(get(OPENFLOW_CONTROLLER_POLL_INTERVAL));
+	}
+
+	/**
+	 * Getter for the ironflowDeviceExpireTime property.
+	 * 
+	 * @return property integer
+	 */
+	public static int ironflowDeviceExpireTime() {
+		return Integer.parseInt(get(IRONFLOW_DEVICE_EXPIRE_TIME));
+	}
+
+	/**
+	 * Getter for the openflowClassnamePropertiesFilename property.
+	 * 
+	 * @return property string
+	 */
+	public static String openflowClassnamePropertiesFilename() {
+		return get(OPENFLOW_CLASSNAME_PROPERTIES_FILENAME);
+	}
+
+	/**
+	 * Getter for the ifmapKeepalive property.
+	 * 
+	 * @return property integer
+	 */
+	public static int ifmapKeepalive() {
+		return Integer.parseInt(get(IFMAP_KEEPALIVE));
+	}
+
+	/**
+	 * Getter for the subscriberPdp property.
+	 * 
+	 * @return property string
+	 */
+	public static String subscriberPdp() {
+		return get(SUBSCRIBER_PDP);
+	}
+
 }

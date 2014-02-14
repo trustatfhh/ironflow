@@ -58,6 +58,15 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.10</version>
+				<configuration>
+					<propertyExpansion>headerfile=${project.basedir}/src/license/dummy/Dummy.java</propertyExpansion>
+					<configLocation>http://trust.f4.hs-hannover.de/download/dev_docs/code_conventions/trustHsHCodeconventions.xml</configLocation>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.2.2</version>
 				<configuration>
@@ -93,10 +102,13 @@
 				<configuration>
 					<licenseName>apache_v2</licenseName>
 					<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+					<canUpdateDescription>true</canUpdateDescription>
+					<canUpdateCopyright>true</canUpdateCopyright>
 					<descriptionTemplate>${basedir}/src/license/description_template.ftl</descriptionTemplate>
 					<roots>
 						<root>src/main/java</root>
 						<root>src/test/java</root>
+						<root>src/license/dummy</root>
 					</roots>
 				</configuration>
 			</plugin>
