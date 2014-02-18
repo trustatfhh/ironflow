@@ -50,6 +50,7 @@ import java.util.logging.Logger;
 
 import de.hshannover.f4.trust.ironflow.publisher.PublisherThread;
 import de.hshannover.f4.trust.ironflow.publisher.RequestChainBuilder;
+import de.hshannover.f4.trust.ironflow.subscriber.SubscriberChainBuilder;
 import de.hshannover.f4.trust.ironflow.subscriber.SubscriberThread;
 import de.hshannover.f4.trust.ironflow.utilities.IfMap;
 import de.hshannover.f4.trust.ironflow.utilities.SsrcKeepaliveThread;
@@ -86,6 +87,7 @@ public final class Ironflow {
 		setupLogging();
 		Configuration.init();
 		RequestChainBuilder.init();
+		SubscriberChainBuilder.init();
 
 		IfMap.initSsrc(Configuration.ifmapAuthMethod(), Configuration.ifmapUrlBasic(), Configuration.ifmapUrlCert(),
 				Configuration.ifmapBasicUser(), Configuration.ifmapBasicPassword(), Configuration.keyStorePath(),

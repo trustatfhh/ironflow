@@ -36,7 +36,7 @@
  * limitations under the License.
  * #L%
  */
-package de.hshannover.f4.trust.ironflow.publisher;
+package de.hshannover.f4.trust.ironflow.publisher.strategies;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -68,6 +68,7 @@ import de.fhhannover.inform.trust.ifmapj.messages.Requests;
 import de.fhhannover.inform.trust.ifmapj.metadata.EventType;
 import de.fhhannover.inform.trust.ifmapj.metadata.Significance;
 import de.hshannover.f4.trust.ironflow.Configuration;
+import de.hshannover.f4.trust.ironflow.publisher.RequestStrategy;
 
 /**
  * This class is the implementation to request the OpenflowController for all

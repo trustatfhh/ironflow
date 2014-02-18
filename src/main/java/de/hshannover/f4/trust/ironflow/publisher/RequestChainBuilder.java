@@ -62,7 +62,7 @@ public final class RequestChainBuilder {
 	/**
 	 * The package path to the strategy classes.
 	 */
-	private static final String PACKAGE_PATH = "de.hshannover.f4.trust.ironflow.publisher.";
+	private static final String PACKAGE_PATH = "de.hshannover.f4.trust.ironflow.publisher.strategies.";
 
 	/**
 	 * the List/Chain with the different strategy objects

@@ -39,6 +39,7 @@
 
 package de.hshannover.f4.trust.ironflow.subscriber;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.logging.Logger;
@@ -50,97 +51,65 @@ import de.fhhannover.inform.trust.ifmapj.exception.EndSessionException;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapErrorResult;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapException;
 import de.fhhannover.inform.trust.ifmapj.identifier.Device;
-import de.fhhannover.inform.trust.ifmapj.identifier.Identifiers;
+import de.fhhannover.inform.trust.ifmapj.identifier.Identifier;
+import de.fhhannover.inform.trust.ifmapj.identifier.IpAddress;
+import de.fhhannover.inform.trust.ifmapj.identifier.MacAddress;
 import de.fhhannover.inform.trust.ifmapj.messages.PollResult;
 import de.fhhannover.inform.trust.ifmapj.messages.Requests;
+import de.fhhannover.inform.trust.ifmapj.messages.ResultItem;
+import de.fhhannover.inform.trust.ifmapj.messages.SearchRequest;
 import de.fhhannover.inform.trust.ifmapj.messages.SearchResult;
 import de.fhhannover.inform.trust.ifmapj.messages.SearchResult.Type;
-import de.fhhannover.inform.trust.ifmapj.messages.SubscribeRequest;
-import de.fhhannover.inform.trust.ifmapj.messages.SubscribeUpdate;
-import de.hshannover.f4.trust.ironflow.Configuration;
 import de.hshannover.f4.trust.ironflow.utilities.IfMap;
 
 public class SubscriberThread extends TimerTask {
 
 	private static final Logger LOGGER = Logger.getLogger(SubscriberThread.class.getName());
 
-	/**
-	 * Helper Methode to initialize the subcriber function
-	 * 
-	 */
-	private void initSubscriber() {
-
-		LOGGER.fine("subscribing for " + Configuration.subscriberPdp());
-
-		Device pdpIdentifier = Identifiers.createDev(Configuration.subscriberPdp());
-
-		SubscribeRequest subscribeRequest = Requests.createSubscribeReq();
-		SubscribeUpdate subscribeUpdate = Requests.createSubscribeUpdate();
-		subscribeUpdate.setName("ironflow-subscriber");
-		subscribeUpdate.setMatchLinksFilter("meta:request-for-investigation");
-		subscribeUpdate.setMaxDepth(1);
-		subscribeUpdate.setStartIdentifier(pdpIdentifier);
-
-		subscribeUpdate.addNamespaceDeclaration(IfmapStrings.BASE_PREFIX, IfmapStrings.BASE_NS_URI);
-		subscribeUpdate.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI);
-
-		subscribeRequest.addSubscribeElement(subscribeUpdate);
-
-		try {
-			IfMap.getSsrc().subscribe(subscribeRequest);
-
-		} catch (IfmapErrorResult e) {
-			LOGGER.severe("SubscriberThread: " + e);
-		} catch (IfmapException e) {
-			LOGGER.severe("SubscriberThread: " + e);
-		}
-	}
-
 	@Override
 	public void run() {
 
-		initSubscriber();
+		for (int i = 0; i < SubscriberChainBuilder.getSize(); i++) {
+			SubscriberChainBuilder.getElementAt(i).initSubscriber();
+		}
 
+		ARC arc = IfMap.getArc();
 		try {
 			while (!Thread.currentThread().isInterrupted()) {
 				LOGGER.info("polling for targets ...");
 
-				ARC arc = IfMap.getArc();
 				PollResult pollResult;
 				pollResult = arc.poll();
-				arc.closeTcpConnection();
 
 				if (pollResult.getResults().size() > 0) {
 					List<SearchResult> results = pollResult.getResults();
-					for (SearchResult r : results) {
-						if (r.getType() == Type.searchResult) {
+					for (SearchResult searchResult : results) {
+						if (searchResult.getType() == Type.searchResult) {
 							LOGGER.finer("processing searchResult ...");
-
-						} else if (r.getType() == Type.updateResult) {
+							executeOpenflowFirewallStrategy(searchResult);
+						} else if (searchResult.getType() == Type.updateResult) {
 							LOGGER.finer("processing updateResult ...");
-
-						} else if (r.getType() == Type.notifyResult) {
+							executeOpenflowFirewallStrategy(searchResult);
+						} else if (searchResult.getType() == Type.notifyResult) {
 							LOGGER.finer("processing notifyResult ...");
-
-						} else if (r.getType() == Type.deleteResult) {
+							executeOpenflowFirewallStrategy(searchResult);
+						} else if (searchResult.getType() == Type.deleteResult) {
 							LOGGER.finer("processing deleteResult ...");
-
+							deleteOpenflowFirewallStrategy(searchResult);
 						}
 					}
 				}
 			}
 		} catch (IfmapErrorResult e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("SubscriberThread: " + e);
 		} catch (EndSessionException e) {
 			LOGGER.warning("SubscriberThread: session ended during poll " + e);
 		} catch (CommunicationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("SubscriberThread: " + e);
 		} catch (IfmapException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("SubscriberThread: " + e);
 		}
 
 	}
+
 }
