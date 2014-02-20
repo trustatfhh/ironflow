@@ -41,7 +41,16 @@ package de.hshannover.f4.trust.ironflow.subscriber;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import de.hshannover.f4.trust.ironflow.subscriber.strategies.BlockTrafficSubscriber;
+import de.hshannover.f4.trust.ironflow.subscriber.strategies.BlockClientTrafficSubscriber;
+
+/**
+ * This class initialize the Subscriber chain to poll the Ifmap server for
+ * request for investigation metadata. In addition it holds the list of the
+ * subscriber strategy Objects
+ * 
+ * @author Marius Rohde
+ * 
+ */
 
 public final class SubscriberChainBuilder {
 
@@ -87,7 +96,7 @@ public final class SubscriberChainBuilder {
 		SubscriberStrategy subscriber;
 		subscriberChain = new ArrayList<SubscriberStrategy>();
 
-		subscriber = new BlockTrafficSubscriber();
+		subscriber = new BlockClientTrafficSubscriber();
 
 		subscriberChain.add(subscriber);
 

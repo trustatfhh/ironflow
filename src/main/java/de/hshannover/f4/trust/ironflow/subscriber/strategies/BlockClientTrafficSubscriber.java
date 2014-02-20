@@ -38,8 +38,35 @@
  */
 package de.hshannover.f4.trust.ironflow.subscriber.strategies;
 
+import de.fhhannover.inform.trust.ifmapj.identifier.Identifier;
 import de.hshannover.f4.trust.ironflow.subscriber.SubscriberStrategy;
 
-public class BlockTrafficSubscriber extends SubscriberStrategy {
+public class BlockClientTrafficSubscriber extends SubscriberStrategy {
+
+	private static final String SUBSCRIBERNAME = "ironflow-subscriber-Openflow_BLOCK";
+
+	private static final String SUBSCRIBERFILTER = "meta:request-for-investigation[@qualifier='Openflow_BLOCK']";
+
+	@Override
+	protected String getSubscriberName() {
+		return SUBSCRIBERNAME;
+	}
+
+	@Override
+	protected String getSubscriberFilter() {
+		return SUBSCRIBERFILTER;
+	}
+
+	@Override
+	protected void executeFirewallSettings(Identifier[] switchMacIp) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void deleteFirewallSettings(Identifier[] switchMacIp) {
+		// TODO Auto-generated method stub
+
+	}
 
 }

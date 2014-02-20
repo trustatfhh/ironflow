@@ -87,7 +87,7 @@ public final class Configuration {
 
 	// publisher
 	private static final String OPENFLOW_CONTROLLER_POLL_INTERVAL = "ironflow.poll.interval";
-	private static final String OPENFLOW_CLASSNAME_PROPERTIES_FILENAME = "ironflow.requeststrategies.publisher";
+	private static final String OPENFLOW_CLASSNAME_PROPERTIES_FILENAME = "ironflow.publisher.requeststrategies";
 	private static final String IRONFLOW_DEVICE_EXPIRE_TIME = "ironflow.device.expire.time";
 
 	// subscriber

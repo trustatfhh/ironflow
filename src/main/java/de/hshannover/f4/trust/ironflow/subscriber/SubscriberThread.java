@@ -39,28 +39,28 @@
 
 package de.hshannover.f4.trust.ironflow.subscriber;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
-import de.fhhannover.inform.trust.ifmapj.binding.IfmapStrings;
 import de.fhhannover.inform.trust.ifmapj.channel.ARC;
 import de.fhhannover.inform.trust.ifmapj.exception.CommunicationException;
 import de.fhhannover.inform.trust.ifmapj.exception.EndSessionException;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapErrorResult;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapException;
-import de.fhhannover.inform.trust.ifmapj.identifier.Device;
-import de.fhhannover.inform.trust.ifmapj.identifier.Identifier;
-import de.fhhannover.inform.trust.ifmapj.identifier.IpAddress;
-import de.fhhannover.inform.trust.ifmapj.identifier.MacAddress;
 import de.fhhannover.inform.trust.ifmapj.messages.PollResult;
-import de.fhhannover.inform.trust.ifmapj.messages.Requests;
-import de.fhhannover.inform.trust.ifmapj.messages.ResultItem;
-import de.fhhannover.inform.trust.ifmapj.messages.SearchRequest;
 import de.fhhannover.inform.trust.ifmapj.messages.SearchResult;
 import de.fhhannover.inform.trust.ifmapj.messages.SearchResult.Type;
 import de.hshannover.f4.trust.ironflow.utilities.IfMap;
+
+/**
+ * This class pools the Ifmap Server for the request for investigation metadata and calls
+ * the function in the subscriber strategies to set the firewall of the Floodlightcontroller
+ * 
+ * @author Marius Rohde
+ * 
+ */
+
 
 public class SubscriberThread extends TimerTask {
 
@@ -86,16 +86,24 @@ public class SubscriberThread extends TimerTask {
 					for (SearchResult searchResult : results) {
 						if (searchResult.getType() == Type.searchResult) {
 							LOGGER.finer("processing searchResult ...");
-							executeOpenflowFirewallStrategy(searchResult);
+							for (int i = 0; i < SubscriberChainBuilder.getSize(); i++) {
+								SubscriberChainBuilder.getElementAt(i).executeOpenflowFirewallStrategy(searchResult);
+							}
 						} else if (searchResult.getType() == Type.updateResult) {
 							LOGGER.finer("processing updateResult ...");
-							executeOpenflowFirewallStrategy(searchResult);
+							for (int i = 0; i < SubscriberChainBuilder.getSize(); i++) {
+								SubscriberChainBuilder.getElementAt(i).executeOpenflowFirewallStrategy(searchResult);
+							}
 						} else if (searchResult.getType() == Type.notifyResult) {
 							LOGGER.finer("processing notifyResult ...");
-							executeOpenflowFirewallStrategy(searchResult);
+							for (int i = 0; i < SubscriberChainBuilder.getSize(); i++) {
+								SubscriberChainBuilder.getElementAt(i).executeOpenflowFirewallStrategy(searchResult);
+							}
 						} else if (searchResult.getType() == Type.deleteResult) {
 							LOGGER.finer("processing deleteResult ...");
-							deleteOpenflowFirewallStrategy(searchResult);
+							for (int i = 0; i < SubscriberChainBuilder.getSize(); i++) {
+								SubscriberChainBuilder.getElementAt(i).deleteOpenflowFirewallStrategy(searchResult);
+							}
 						}
 					}
 				}

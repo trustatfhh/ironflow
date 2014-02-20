@@ -46,8 +46,8 @@ import java.util.logging.Logger;
 import de.hshannover.f4.trust.ironflow.Configuration;
 
 /**
- * This class initialise the Request chain to Request the OpenflowController
- * over the REST API. In Addition it holds the list of the RequestStrategy
+ * This class initialize the request chain to request the OpenflowController
+ * over the REST API. In addition it holds the list of the RequestStrategy
  * Objects
  * 
  * 

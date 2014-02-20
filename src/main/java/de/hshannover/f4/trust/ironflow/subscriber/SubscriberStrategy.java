@@ -60,12 +60,21 @@ import de.fhhannover.inform.trust.ifmapj.messages.SearchResult.Type;
 import de.hshannover.f4.trust.ironflow.Configuration;
 import de.hshannover.f4.trust.ironflow.utilities.IfMap;
 
+/**
+ * This abstract class is an abstract represent of the Implementation of the
+ * different subscriber strategies to set firewall entries on the floodlight
+ * openflow controller
+ * 
+ * @author Marius Rohde
+ * 
+ */
+
 public abstract class SubscriberStrategy {
 
 	private static final Logger LOGGER = Logger.getLogger(SubscriberStrategy.class.getName());
 
 	/**
-	 * Helper method to initialize the subscriber function
+	 * Method to initialize the subscriber function on the Ifmap server
 	 * 
 	 */
 	public void initSubscriber() {
@@ -76,8 +85,8 @@ public abstract class SubscriberStrategy {
 
 		SubscribeRequest subscribeRequest = Requests.createSubscribeReq();
 		SubscribeUpdate subscribeUpdate = Requests.createSubscribeUpdate();
-		subscribeUpdate.setName("ironflow-subscriber-Openflow_BLOCK");
-		subscribeUpdate.setMatchLinksFilter("meta:request-for-investigation[@qualifier='Openflow_BLOCK']");
+		subscribeUpdate.setName(getSubscriberName());
+		subscribeUpdate.setMatchLinksFilter(getSubscriberFilter());
 		subscribeUpdate.setMaxDepth(1);
 		subscribeUpdate.setStartIdentifier(pdpIdentifier);
 
@@ -98,36 +107,80 @@ public abstract class SubscriberStrategy {
 	/**
 	 * Method to execute the OpenflowFirewallStrategie
 	 * 
+	 * @param searchResult
+	 *            with empty resultitems
+	 * 
 	 */
-	public void executeOpenflowFirewallStrategy(List<ResultItem> resultItems) {
+	public void executeOpenflowFirewallStrategy(SearchResult searchResult) {
 
-		for (ResultItem resultItem : resultItems) {
-			Identifier[] switchMacIp = searchMacIpDiscoveredBySwitch(resultItem);
+		if (searchResult.getName().equals(getSubscriberName())) {
+			List<ResultItem> cleanedResultItems = cleanEmptySearchResult(searchResult);
+
+			for (ResultItem resultItem : cleanedResultItems) {
+				Identifier[] switchMacIp = searchMacIpDiscoveredBySwitch(resultItem);
+				executeFirewallSettings(switchMacIp);
+			}
 		}
-
 	}
 
 	/**
 	 * Method to delete the OpenflowFirewallStrategie
 	 * 
+	 * @param searchResult
+	 *            with empty resultitems
 	 */
-	public void deleteOpenflowFirewallStrategy(List<ResultItem> resultItems) {
+	public void deleteOpenflowFirewallStrategy(SearchResult searchResult) {
 
-		for (ResultItem resultItem : resultItems) {
-			Identifier[] switchMacIp = searchMacIpDiscoveredBySwitch(resultItem);
+		if (searchResult.getName().equals(getSubscriberName())) {
+			List<ResultItem> cleanedResultItems = cleanEmptySearchResult(searchResult);
+
+			for (ResultItem resultItem : cleanedResultItems) {
+				Identifier[] switchMacIp = searchMacIpDiscoveredBySwitch(resultItem);
+				deleteFirewallSettings(switchMacIp);
+			}
 		}
-
 	}
+
+	/**
+	 * Method to get the OpenflowFirewallStrategie subscribername from the
+	 * implementation class of the Subscriber
+	 * 
+	 * @return the name of the subscriber
+	 */
+	protected abstract String getSubscriberName();
+
+	/**
+	 * Method to get the OpenflowFirewallStrategie subscriber Filter from the
+	 * implementation class of the Subscriber to define the Request for
+	 * Investigation qualifier name
+	 * 
+	 * @return the name of the subscriber
+	 */
+	protected abstract String getSubscriberFilter();
+
+	/**
+	 * Method to set the firewall settings on the floodlight openflow controller
+	 * 
+	 */
+
+	protected abstract void executeFirewallSettings(Identifier[] switchMacIp);
+
+	/**
+	 * Method to delete the firewall settings on the floodlight openflow
+	 * controller
+	 * 
+	 */
+	protected abstract void deleteFirewallSettings(Identifier[] switchMacIp);
 
 	/**
 	 * Helper method to clean the searchResult from the empty ResultItems
 	 * 
 	 * @return the ArrayList of ResultItems from a SearchResult
 	 */
-	private List<ResultItem> cleanEmptySearchResult(SearchResult searchResults) {
+	private List<ResultItem> cleanEmptySearchResult(SearchResult searchResult) {
 		List<ResultItem> resultItems = new ArrayList<ResultItem>();
 
-		for (ResultItem resultItem : searchResults.getResultItems()) {
+		for (ResultItem resultItem : searchResult.getResultItems()) {
 			if (!resultItem.getMetadata().isEmpty()) {
 				resultItems.add(resultItem);
 			}
@@ -192,4 +245,5 @@ public abstract class SubscriberStrategy {
 
 		return switchMacIp;
 	}
+
 }
