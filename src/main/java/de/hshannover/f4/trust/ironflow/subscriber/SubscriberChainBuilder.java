@@ -39,8 +39,11 @@
 package de.hshannover.f4.trust.ironflow.subscriber;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import de.hshannover.f4.trust.ironflow.Configuration;
 import de.hshannover.f4.trust.ironflow.subscriber.strategies.BlockClientTrafficSubscriber;
 
 /**
@@ -68,8 +71,7 @@ public final class SubscriberChainBuilder {
 	/**
 	 * The package path to the strategy classes.
 	 */
-	// private static final String PACKAGE_PATH =
-	// "de.hshannover.f4.trust.ironflow.subscriber.strategies.";
+	private static final String PACKAGE_PATH = "de.hshannover.f4.trust.ironflow.subscriber.strategies.";
 
 	/**
 	 * the List/Chain with the different strategy objects
@@ -96,10 +98,55 @@ public final class SubscriberChainBuilder {
 		SubscriberStrategy subscriber;
 		subscriberChain = new ArrayList<SubscriberStrategy>();
 
+		Iterator<Entry<Object, Object>> iteClassnames = Configuration.getSubscriberStrategiesClassnameMap().iterator();
+
+		while (iteClassnames.hasNext()) {
+
+			Entry<Object, Object> classname = iteClassnames.next();
+			LOGGER.info("SubscriberChainBuilder : found classString " + classname.getKey().toString());
+
+			if (classname.getValue().toString().equals("enabled")) {
+
+				subscriber = createNewSubscriberStrategie(PACKAGE_PATH + classname.getKey().toString());
+				if (subscriber != null) {
+					subscriberChain.add(subscriber);
+				}
+			}
+		}
+
 		subscriber = new BlockClientTrafficSubscriber();
 
 		subscriberChain.add(subscriber);
 
+	}
+
+	/**
+	 * This helper methode creates a new SubscriberStrategieObject
+	 * 
+	 * @param className
+	 * @return SubscriberStrategy object
+	 */
+
+	private static SubscriberStrategy createNewSubscriberStrategie(String className) {
+
+		SubscriberStrategy subscriberStrategy = null;
+
+		try {
+			Class<?> cl = Class.forName(className);
+			LOGGER.info("SubscriberChainBuilder : " + cl.toString() + " instantiated");
+			if (cl.getSuperclass() == SubscriberStrategy.class) {
+				subscriberStrategy = (SubscriberStrategy) cl.newInstance();
+			}
+
+		} catch (ClassNotFoundException e) {
+			LOGGER.severe("SubscriberChainBuilder: ClassNotFound");
+		} catch (InstantiationException e) {
+			LOGGER.severe("SubscriberChainBuilder: InstantiationException");
+		} catch (IllegalAccessException e) {
+			LOGGER.severe("SubscriberChainBuilder: IllegalAccessException");
+		}
+
+		return subscriberStrategy;
 	}
 
 	/**

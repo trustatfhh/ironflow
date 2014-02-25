@@ -86,12 +86,13 @@ public final class Ironflow {
 
 		setupLogging();
 		Configuration.init();
-		RequestChainBuilder.init();
-		SubscriberChainBuilder.init();
 
 		IfMap.initSsrc(Configuration.ifmapAuthMethod(), Configuration.ifmapUrlBasic(), Configuration.ifmapUrlCert(),
 				Configuration.ifmapBasicUser(), Configuration.ifmapBasicPassword(), Configuration.keyStorePath(),
 				Configuration.keyStorePassword());
+
+		RequestChainBuilder.init();
+		SubscriberChainBuilder.init();
 
 		try {
 			IfMap.getSsrc().newSession();

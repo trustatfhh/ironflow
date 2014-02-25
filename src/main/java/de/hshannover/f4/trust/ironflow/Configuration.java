@@ -67,7 +67,9 @@ public final class Configuration {
 
 	private static Properties mProperties;
 
-	private static Properties mClassnamesForRequestStrategie;
+	private static Properties mClassnamesForRequestStrategy;
+
+	private static Properties mClassnamesForSubscriberStrategy;
 
 	// begin configuration parameter -------------------------------------------
 
@@ -87,11 +89,12 @@ public final class Configuration {
 
 	// publisher
 	private static final String OPENFLOW_CONTROLLER_POLL_INTERVAL = "ironflow.poll.interval";
-	private static final String OPENFLOW_CLASSNAME_PROPERTIES_FILENAME = "ironflow.publisher.requeststrategies";
-	private static final String IRONFLOW_DEVICE_EXPIRE_TIME = "ironflow.device.expire.time";
+	private static final String REQUEST_STRATEGIES_CLASSNAMES_FILENAME = "ironflow.publisher.requeststrategies";
+	private static final String DEVICE_EXPIRE_TIME = "ironflow.device.expire.time";
 
 	// subscriber
 	private static final String SUBSCRIBER_PDP = "ironflow.subscriber.pdp";
+	private static final String SUBSCRIBER_STRATEGIES_CLASSNAMES_FILENAME = "ironflow.subscriber.subscriberstrategies";
 
 	// end configuration parameter ---------------------------------------------
 
@@ -110,13 +113,17 @@ public final class Configuration {
 		LOGGER.info("reading " + CONFIG_FILE + " ...");
 
 		mProperties = new Properties();
-		mClassnamesForRequestStrategie = new Properties();
+		mClassnamesForRequestStrategy = new Properties();
+		mClassnamesForSubscriberStrategy = new Properties();
 
 		InputStream in = Configuration.class.getResourceAsStream(CONFIG_FILE);
 		loadPropertiesfromFile(in, mProperties);
 
-		in = Configuration.class.getResourceAsStream("/" + openflowClassnamePropertiesFilename());
-		loadPropertiesfromFile(in, mClassnamesForRequestStrategie);
+		in = Configuration.class.getResourceAsStream("/" + ironflowRequestStrategiesClassnamePropertiesFilename());
+		loadPropertiesfromFile(in, mClassnamesForRequestStrategy);
+
+		in = Configuration.class.getResourceAsStream("/" + ironflowSubscriberStrategiesClassnamePropertiesFilename());
+		loadPropertiesfromFile(in, mClassnamesForSubscriberStrategy);
 
 	}
 
@@ -164,15 +171,27 @@ public final class Configuration {
 	}
 
 	/**
-	 * Getter for the classname map.
+	 * Getter for the request Strategies classname map.
 	 * 
 	 * @return the set of classnames for request strategies
 	 */
-	public static Set<Entry<Object, Object>> getClassnameMap() {
-		if (mClassnamesForRequestStrategie == null) {
+	public static Set<Entry<Object, Object>> getRequestStrategiesClassnameMap() {
+		if (mClassnamesForRequestStrategy == null) {
 			init();
 		}
-		return mClassnamesForRequestStrategie.entrySet();
+		return mClassnamesForRequestStrategy.entrySet();
+	}
+
+	/**
+	 * Getter for the subscriber strategies classname map.
+	 * 
+	 * @return the set of classnames for subscriber strategies
+	 */
+	public static Set<Entry<Object, Object>> getSubscriberStrategiesClassnameMap() {
+		if (mClassnamesForSubscriberStrategy == null) {
+			init();
+		}
+		return mClassnamesForSubscriberStrategy.entrySet();
 	}
 
 	/**
@@ -272,16 +291,26 @@ public final class Configuration {
 	 * @return property integer
 	 */
 	public static int ironflowDeviceExpireTime() {
-		return Integer.parseInt(get(IRONFLOW_DEVICE_EXPIRE_TIME));
+		return Integer.parseInt(get(DEVICE_EXPIRE_TIME));
 	}
 
 	/**
-	 * Getter for the openflowClassnamePropertiesFilename property.
+	 * Getter for the request strategies ClassnamePropertiesFilename property.
 	 * 
 	 * @return property string
 	 */
-	public static String openflowClassnamePropertiesFilename() {
-		return get(OPENFLOW_CLASSNAME_PROPERTIES_FILENAME);
+	public static String ironflowRequestStrategiesClassnamePropertiesFilename() {
+		return get(REQUEST_STRATEGIES_CLASSNAMES_FILENAME);
+	}
+
+	/**
+	 * Getter for the subscriber strategies ClassnamePropertiesFilename
+	 * property.
+	 * 
+	 * @return property string
+	 */
+	public static String ironflowSubscriberStrategiesClassnamePropertiesFilename() {
+		return get(SUBSCRIBER_STRATEGIES_CLASSNAMES_FILENAME);
 	}
 
 	/**

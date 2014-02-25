@@ -42,6 +42,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.jackson.JacksonFeature;
+
 import de.fhhannover.inform.trust.ifmapj.binding.IfmapStrings;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapErrorResult;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapException;
@@ -171,6 +177,24 @@ public abstract class SubscriberStrategy {
 	 * 
 	 */
 	protected abstract void deleteFirewallSettings(Identifier[] switchMacIp);
+
+	/**
+	 * Method to get the webtarget to the REST API of the floodlight openflow
+	 * controller
+	 * 
+	 * @return Webtraget of the Openflow Floodlight Webserver
+	 * 
+	 */
+	protected WebTarget getWebTarget() {
+
+		Client client = ClientBuilder.newClient(new ClientConfig().register(JacksonFeature.class));
+
+		WebTarget webTarget = client.target("http://" + Configuration.openFlowControllerIp() + ":"
+				+ Configuration.openFlowControllerPort());
+
+		return webTarget;
+
+	}
 
 	/**
 	 * Helper method to clean the searchResult from the empty ResultItems

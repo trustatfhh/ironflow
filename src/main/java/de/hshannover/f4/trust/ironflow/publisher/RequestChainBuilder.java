@@ -87,7 +87,7 @@ public final class RequestChainBuilder {
 		LOGGER.info("RequestChainBuilder : looking for classes in package " + PACKAGE_PATH);
 
 		RequestStrategy request;
-		Iterator<Entry<Object, Object>> iteClassnames = Configuration.getClassnameMap().iterator();
+		Iterator<Entry<Object, Object>> iteClassnames = Configuration.getRequestStrategiesClassnameMap().iterator();
 		requestChain = new ArrayList<RequestStrategy>();
 
 		while (iteClassnames.hasNext()) {
