@@ -102,13 +102,18 @@ public final class Ironflow {
 			System.exit(1);
 		}
 
-		Timer timer = new Timer();
+		Timer timerA = new Timer();
+		timerA.schedule(new SsrcKeepaliveThread(), 1000, Configuration.ifmapKeepalive() * 1000);
+		Timer timerB = new Timer();
+		timerB.schedule(new PublisherThread(), 2000, Configuration.openFlowControllerPollingInterval() * 1000);
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			LOGGER.warning("Could not wait 3 seconds before the subscriber thread starts");
+		}
+		new SubscriberThread().start();
 
-		timer.schedule(new SsrcKeepaliveThread(), 1000, Configuration.ifmapKeepalive() * 1000);
-		timer.schedule(new PublisherThread(), 2000, Configuration.openFlowControllerPollingInterval() * 1000);
-		// timer.schedule(new SubscriberThread(), 3000);
-
-		// TODO parameter for application control
+		// TODO parameter for application control evtl. Thread termination
 
 	}
 
@@ -126,7 +131,7 @@ public final class Ironflow {
 		} catch (Exception e) {
 			Handler handler = new ConsoleHandler();
 			Logger.getLogger("").addHandler(handler);
-			Logger.getLogger("").setLevel(Level.INFO);
+			Logger.getLogger("").setLevel(Level.FINER);
 
 			LOGGER.severe("could not read " + LOGGING_CONFIG_FILE + ", using defaults");
 

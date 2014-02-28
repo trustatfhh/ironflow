@@ -40,7 +40,6 @@
 package de.hshannover.f4.trust.ironflow.subscriber;
 
 import java.util.List;
-import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import de.fhhannover.inform.trust.ifmapj.channel.ARC;
@@ -54,15 +53,15 @@ import de.fhhannover.inform.trust.ifmapj.messages.SearchResult.Type;
 import de.hshannover.f4.trust.ironflow.utilities.IfMap;
 
 /**
- * This class pools the Ifmap Server for the request for investigation metadata and calls
- * the function in the subscriber strategies to set the firewall of the Floodlightcontroller
+ * This class pools the Ifmap Server for the request for investigation metadata
+ * and calls the function in the subscriber strategies to set the firewall of
+ * the Floodlightcontroller
  * 
  * @author Marius Rohde
  * 
  */
 
-
-public class SubscriberThread extends TimerTask {
+public class SubscriberThread extends Thread {
 
 	private static final Logger LOGGER = Logger.getLogger(SubscriberThread.class.getName());
 

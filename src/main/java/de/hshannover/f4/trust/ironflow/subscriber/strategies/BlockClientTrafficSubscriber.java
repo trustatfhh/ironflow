@@ -40,6 +40,8 @@ package de.hshannover.f4.trust.ironflow.subscriber.strategies;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import javax.ws.rs.client.Entity;
@@ -57,7 +59,6 @@ import de.fhhannover.inform.trust.ifmapj.identifier.Identifier;
 import de.fhhannover.inform.trust.ifmapj.identifier.IpAddress;
 import de.fhhannover.inform.trust.ifmapj.identifier.MacAddress;
 import de.hshannover.f4.trust.ironflow.subscriber.SubscriberStrategy;
-import de.hshannover.f4.trust.ironflow.utilities.IfMap;
 
 /**
  * This class is the implementation to block client traffic if a request for
@@ -72,8 +73,7 @@ public class BlockClientTrafficSubscriber extends SubscriberStrategy {
 
 	private static final Logger LOGGER = Logger.getLogger(BlockClientTrafficSubscriber.class.getName());
 
-	private static final String SUBSCRIBERNAME = "ironflow-subscriber-" + IfMap.getSsrc().getPublisherId()
-			+ "-Openflow_BLOCK";
+	private static final String SUBSCRIBERNAME = "Openflow_BLOCK";
 
 	private static final String SUBSCRIBERFILTER = "meta:request-for-investigation[@qualifier='Openflow_BLOCK']";
 
@@ -146,24 +146,53 @@ public class BlockClientTrafficSubscriber extends SubscriberStrategy {
 	@Override
 	protected void deleteFirewallSettings(Identifier[] switchMacIp) {
 
+		Identifier ipMac = switchMacIp[1];
+		String deleteString = null;
+
 		WebTarget webTarget = getWebTarget().path("/wm/firewall/rules/json");
-		webTarget.queryParam("\"ruleid\"", "\"293255808\"");
 
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.TEXT_PLAIN_TYPE);
 		invocationBuilder.header("some-header", "true");
+		invocationBuilder.header("X-HTTP-Method-Override", "DELETE");
 
-		// String deleteString = "{\"ruleid\":\"42197424\"}";
+		if (ipMac instanceof IpAddress) {
+			IpAddress ip = (IpAddress) ipMac;
+			Iterator<Entry<Identifier, Integer>> itrRuleIds = mRuleids.entrySet().iterator();
+			while (itrRuleIds.hasNext()) {
+				Entry<Identifier, Integer> ruleIdsEntry = itrRuleIds.next();
+				if (ruleIdsEntry.getKey() instanceof IpAddress) {
+					IpAddress ipEntry = (IpAddress) ruleIdsEntry.getKey();
+					if (ipEntry.getValue().equals(ip.getValue())) {
+						deleteString = "{\"ruleid\":\"" + ruleIdsEntry.getValue() + "\"}";
+						itrRuleIds.remove();
+					}
+				}
+			}
+		} else if (ipMac instanceof MacAddress) {
+			MacAddress ip = (MacAddress) ipMac;
+			Iterator<Entry<Identifier, Integer>> itrRuleIds = mRuleids.entrySet().iterator();
 
-		Response response = invocationBuilder.delete();
-		System.out.println(response.getStatus());
+			while (itrRuleIds.hasNext()) {
+				Entry<Identifier, Integer> ruleIdsEntry = itrRuleIds.next();
+				if (ruleIdsEntry.getKey() instanceof MacAddress) {
+					MacAddress ipEntry = (MacAddress) ruleIdsEntry.getKey();
+					if (ipEntry.getValue().equals(ip.getValue())) {
+						deleteString = "{\"ruleid\":\"" + ruleIdsEntry.getValue() + "\"}";
+						itrRuleIds.remove();
+					}
+				}
+			}
+		}
 
-		String jsonStringResponseStatus = response.readEntity(String.class);
-		System.out.println(jsonStringResponseStatus);
-
-		/*
-		 * curl -X DELETE -d '{"ruleid":"42197424"}'
-		 * http://localhost:8080/wm/firewall/rules/json
-		 */
+		if (deleteString != null) {
+			LOGGER.fine("Try to delete Rule");
+			Response response = invocationBuilder.post(Entity.entity(deleteString, MediaType.TEXT_PLAIN));
+			if (response.getStatus() == 200) {
+				LOGGER.fine("Rule deleted");
+			}
+		} else {
+			LOGGER.warning("No rule id for this Identifier found");
+		}
 
 	}
 

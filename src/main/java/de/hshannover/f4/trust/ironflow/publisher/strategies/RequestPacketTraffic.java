@@ -161,7 +161,7 @@ public class RequestPacketTraffic extends RequestStrategy {
 											mMacsAndTxData.put(nodeMacItr.getTextValue(), txPackets);
 
 											// TODO
-											// Delete Events is Lifetime is
+											// Delete Events is Lifetime
 											// session could be modified to
 											// notify Update
 											// then you dont need to delete

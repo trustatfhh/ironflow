@@ -44,7 +44,6 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import de.hshannover.f4.trust.ironflow.Configuration;
-import de.hshannover.f4.trust.ironflow.subscriber.strategies.BlockClientTrafficSubscriber;
 
 /**
  * This class initialize the Subscriber chain to poll the Ifmap server for
@@ -113,11 +112,6 @@ public final class SubscriberChainBuilder {
 				}
 			}
 		}
-
-		subscriber = new BlockClientTrafficSubscriber();
-
-		subscriberChain.add(subscriber);
-
 	}
 
 	/**
