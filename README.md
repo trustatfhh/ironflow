@@ -25,7 +25,7 @@ ironflow consists of two elements:
   - the description of connected switches 
   - the discoverer (the switches) of ips and macs of hosts
 
-* The second, more experimental, part of ironvas - the "subscriber" - goes the
+* The second, more experimental, part of ironflow - the "subscriber" - goes the
   other way around.
   It will subscribe for "request-for-investigation"-metadata of a PDP in the MAPS.
   If the PDP publish those metadata to an IP address, ironflow schedules a firewall
@@ -47,6 +47,7 @@ To use the binary package of ironflow you need the following components:
 * Network/Networksimulation with the OpenFlow controller implementation 
   Floodlight (e.g. [floodlight] [3]) 0.9.0 or higher
 * MAP server implementation (e.g. [irond] [4])
+* optionally ironGui to see whats going on
 
 If you have downloaded the source code and want to build ironflow by
 yourself Maven 3 is also needed.
@@ -66,9 +67,22 @@ In general you have to specify:
 * the Floodlight controller IP address,
 * the Floodlight REST API port,
 * the MAPS URL and credentials.
+* enabled Openflow Firewall if subscriber function is used
 
 Have a look at the comments in `ironflow.properties` for more details.
 
+Tips for openflow/floodlight configuration
+==========================================
+
+If you want to use/test the subscriber function, first enable the firewall 
+of Floodlight. Then create a rule to allow all traffic through all switches.
+Use the following commands to do this.
+
+* curl http://localhost:8080/wm/firewall/module/enable/json
+* curl -X POST -d '{}' http://localhost:8080/wm/firewall/rules/json
+
+If you wonder why not all ips and macs exists in the map graph, 
+try to ping all ips in the network.
 
 Building
 ========
