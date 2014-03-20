@@ -24,6 +24,7 @@
 			<includes>
 				<include>ironflow.properties</include>
 				<include>requestStrategies.properties</include>
+				<include>subscriberStrategies.properties</include>
 				<include>openflowGroup.xml</include>
 				<include>ironflow.jks</include>
 			</includes>

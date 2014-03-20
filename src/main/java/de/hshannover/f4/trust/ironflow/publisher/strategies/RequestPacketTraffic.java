@@ -55,15 +55,12 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.w3c.dom.Document;
 
-import de.fhhannover.inform.trust.ifmapj.binding.IfmapStrings;
 import de.fhhannover.inform.trust.ifmapj.channel.SSRC;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapErrorResult;
 import de.fhhannover.inform.trust.ifmapj.exception.IfmapException;
 import de.fhhannover.inform.trust.ifmapj.identifier.Identifiers;
 import de.fhhannover.inform.trust.ifmapj.identifier.MacAddress;
-import de.fhhannover.inform.trust.ifmapj.messages.MetadataLifetime;
-import de.fhhannover.inform.trust.ifmapj.messages.PublishDelete;
-import de.fhhannover.inform.trust.ifmapj.messages.PublishUpdate;
+import de.fhhannover.inform.trust.ifmapj.messages.PublishNotify;
 import de.fhhannover.inform.trust.ifmapj.messages.Requests;
 import de.fhhannover.inform.trust.ifmapj.metadata.EventType;
 import de.fhhannover.inform.trust.ifmapj.metadata.Significance;
@@ -160,19 +157,29 @@ public class RequestPacketTraffic extends RequestStrategy {
 											mMacsAndRxData.put(nodeMacItr.getTextValue(), rxPackets);
 											mMacsAndTxData.put(nodeMacItr.getTextValue(), txPackets);
 
-											// TODO
-											// Delete Events is Lifetime
-											// session could be modified to
+											// Delete Events is Lifetime session
+											// is modified to
 											// notify Update
 											// then you dont need to delete
 											// events
-											String filterTxRxEvents = String.format(
-													"meta:event[@ifmap-publisher-id='%s']", ssrc.getPublisherId());
-											PublishDelete delTxRxEvents = Requests.createPublishDelete(macHost,
-													filterTxRxEvents);
-											delTxRxEvents.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX,
-													IfmapStrings.STD_METADATA_NS_URI);
-											ssrc.publish(Requests.createPublishReq(delTxRxEvents));
+											/*
+											 * String filterTxRxEvents =
+											 * String.format(
+											 * "meta:event[@ifmap-publisher-id='%s']"
+											 * , ssrc.getPublisherId());
+											 * PublishDelete delTxRxEvents =
+											 * Requests
+											 * .createPublishDelete(macHost,
+											 * filterTxRxEvents);
+											 * delTxRxEvents.addNamespaceDeclaration
+											 * (
+											 * IfmapStrings.STD_METADATA_PREFIX,
+											 * IfmapStrings
+											 * .STD_METADATA_NS_URI);
+											 * ssrc.publish
+											 * (Requests.createPublishReq
+											 * (delTxRxEvents));
+											 */
 
 											// Transmitted packets per interval
 											long txPacketsInterval = 0;
@@ -184,8 +191,8 @@ public class RequestPacketTraffic extends RequestStrategy {
 													dfmt.format(now), ssrc.getPublisherId(), 1, 100,
 													Significance.informational, EventType.p2p, "",
 													"TxPackets: " + txPacketsInterval, "");
-											PublishUpdate publishEventTxMac = Requests.createPublishUpdate(macHost,
-													eventTxMac, MetadataLifetime.session);
+											PublishNotify publishEventTxMac = Requests.createPublishNotify(macHost,
+													eventTxMac);
 											ssrc.publish(Requests.createPublishReq(publishEventTxMac));
 
 											// Recieved packets per interval
@@ -198,8 +205,8 @@ public class RequestPacketTraffic extends RequestStrategy {
 													dfmt.format(now), ssrc.getPublisherId(), 1, 100,
 													Significance.informational, EventType.p2p, "",
 													"RxPackets: " + rxPacketsInterval, "");
-											PublishUpdate publishEventRxMac = Requests.createPublishUpdate(macHost,
-													eventRxMac, MetadataLifetime.session);
+											PublishNotify publishEventRxMac = Requests.createPublishNotify(macHost,
+													eventRxMac);
 											ssrc.publish(Requests.createPublishReq(publishEventRxMac));
 
 										}

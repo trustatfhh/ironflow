@@ -40,6 +40,7 @@
 package de.hshannover.f4.trust.ironflow.subscriber;
 
 import java.util.List;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import de.fhhannover.inform.trust.ifmapj.channel.ARC;
@@ -61,7 +62,7 @@ import de.hshannover.f4.trust.ironflow.utilities.IfMap;
  * 
  */
 
-public class SubscriberThread extends Thread {
+public class SubscriberThread extends TimerTask {
 
 	private static final Logger LOGGER = Logger.getLogger(SubscriberThread.class.getName());
 

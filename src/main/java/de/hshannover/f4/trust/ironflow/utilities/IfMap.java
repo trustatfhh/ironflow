@@ -49,6 +49,9 @@ import de.fhhannover.inform.trust.ifmapj.channel.SSRC;
 import de.fhhannover.inform.trust.ifmapj.exception.InitializationException;
 import de.hshannover.f4.trust.ironflow.Ironflow;
 
+/**
+ * A ifmap class to initiate the ifmap server connection and to get the ssrc and arc channel
+ */
 public final class IfMap {
 
 	/**
