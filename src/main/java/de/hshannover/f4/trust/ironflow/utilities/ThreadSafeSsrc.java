@@ -39,21 +39,22 @@
 package de.hshannover.f4.trust.ironflow.utilities;
 
 import javax.net.ssl.KeyManager;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
-import de.fhhannover.inform.trust.ifmapj.IfmapJ;
-import de.fhhannover.inform.trust.ifmapj.channel.ARC;
-import de.fhhannover.inform.trust.ifmapj.channel.SSRC;
-import de.fhhannover.inform.trust.ifmapj.exception.CommunicationException;
-import de.fhhannover.inform.trust.ifmapj.exception.IfmapErrorResult;
-import de.fhhannover.inform.trust.ifmapj.exception.IfmapException;
-import de.fhhannover.inform.trust.ifmapj.exception.InitializationException;
-import de.fhhannover.inform.trust.ifmapj.messages.PublishRequest;
-import de.fhhannover.inform.trust.ifmapj.messages.Request;
-import de.fhhannover.inform.trust.ifmapj.messages.Result;
-import de.fhhannover.inform.trust.ifmapj.messages.SearchRequest;
-import de.fhhannover.inform.trust.ifmapj.messages.SearchResult;
-import de.fhhannover.inform.trust.ifmapj.messages.SubscribeRequest;
+import de.hshannover.f4.trust.ifmapj.IfmapJ;
+import de.hshannover.f4.trust.ifmapj.channel.ARC;
+import de.hshannover.f4.trust.ifmapj.channel.SSRC;
+import de.hshannover.f4.trust.ifmapj.exception.CommunicationException;
+import de.hshannover.f4.trust.ifmapj.exception.IfmapErrorResult;
+import de.hshannover.f4.trust.ifmapj.exception.IfmapException;
+import de.hshannover.f4.trust.ifmapj.exception.InitializationException;
+import de.hshannover.f4.trust.ifmapj.messages.PublishRequest;
+import de.hshannover.f4.trust.ifmapj.messages.Request;
+import de.hshannover.f4.trust.ifmapj.messages.Result;
+import de.hshannover.f4.trust.ifmapj.messages.SearchRequest;
+import de.hshannover.f4.trust.ifmapj.messages.SearchResult;
+import de.hshannover.f4.trust.ifmapj.messages.SubscribeRequest;
 
 /**
  * This class wraps a {@link SSRC} in a thread safe manner.

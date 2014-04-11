@@ -41,8 +41,8 @@ package de.hshannover.f4.trust.ironflow.utilities;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
-import de.fhhannover.inform.trust.ifmapj.exception.IfmapErrorResult;
-import de.fhhannover.inform.trust.ifmapj.exception.IfmapException;
+import de.hshannover.f4.trust.ifmapj.exception.IfmapErrorResult;
+import de.hshannover.f4.trust.ifmapj.exception.IfmapException;
 
 /**
  * A {@link Keepalive} can be used to keep an IF-MAP connection alive, by

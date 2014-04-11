@@ -43,14 +43,14 @@ import java.util.List;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
-import de.fhhannover.inform.trust.ifmapj.channel.ARC;
-import de.fhhannover.inform.trust.ifmapj.exception.CommunicationException;
-import de.fhhannover.inform.trust.ifmapj.exception.EndSessionException;
-import de.fhhannover.inform.trust.ifmapj.exception.IfmapErrorResult;
-import de.fhhannover.inform.trust.ifmapj.exception.IfmapException;
-import de.fhhannover.inform.trust.ifmapj.messages.PollResult;
-import de.fhhannover.inform.trust.ifmapj.messages.SearchResult;
-import de.fhhannover.inform.trust.ifmapj.messages.SearchResult.Type;
+import de.hshannover.f4.trust.ifmapj.channel.ARC;
+import de.hshannover.f4.trust.ifmapj.exception.CommunicationException;
+import de.hshannover.f4.trust.ifmapj.exception.EndSessionException;
+import de.hshannover.f4.trust.ifmapj.exception.IfmapErrorResult;
+import de.hshannover.f4.trust.ifmapj.exception.IfmapException;
+import de.hshannover.f4.trust.ifmapj.messages.PollResult;
+import de.hshannover.f4.trust.ifmapj.messages.SearchResult;
+import de.hshannover.f4.trust.ifmapj.messages.SearchResult.Type;
 import de.hshannover.f4.trust.ironflow.utilities.IfMap;
 
 /**

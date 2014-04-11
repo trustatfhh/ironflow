@@ -4,7 +4,7 @@
   <!-- general project information -->
 	<groupId>de.hshannover.f4.trust</groupId>
 	<artifactId>ironflow</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<packaging>jar</packaging>
 	<inceptionYear>2013</inceptionYear>
 	<name>ironflow</name>
@@ -129,9 +129,9 @@
 	</dependency>
 	
 	<dependency>
-		<groupId>de.fhhannover.inform.trust</groupId>
+		<groupId>de.hshannover.f4.trust</groupId>
 		<artifactId>ifmapj</artifactId>
-		<version>0.1.5</version>
+		<version>1.0.1</version>
 	</dependency>
   </dependencies>
   

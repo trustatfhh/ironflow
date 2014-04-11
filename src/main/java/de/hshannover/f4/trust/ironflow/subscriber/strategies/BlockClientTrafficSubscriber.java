@@ -55,9 +55,9 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import de.fhhannover.inform.trust.ifmapj.identifier.Identifier;
-import de.fhhannover.inform.trust.ifmapj.identifier.IpAddress;
-import de.fhhannover.inform.trust.ifmapj.identifier.MacAddress;
+import de.hshannover.f4.trust.ifmapj.identifier.Identifier;
+import de.hshannover.f4.trust.ifmapj.identifier.IpAddress;
+import de.hshannover.f4.trust.ifmapj.identifier.MacAddress;
 import de.hshannover.f4.trust.ironflow.subscriber.SubscriberStrategy;
 
 /**

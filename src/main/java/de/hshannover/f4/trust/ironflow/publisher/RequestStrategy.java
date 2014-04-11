@@ -43,9 +43,9 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import de.fhhannover.inform.trust.ifmapj.IfmapJ;
-import de.fhhannover.inform.trust.ifmapj.channel.SSRC;
-import de.fhhannover.inform.trust.ifmapj.metadata.StandardIfmapMetadataFactory;
+import de.hshannover.f4.trust.ifmapj.IfmapJ;
+import de.hshannover.f4.trust.ifmapj.channel.SSRC;
+import de.hshannover.f4.trust.ifmapj.metadata.StandardIfmapMetadataFactory;
 
 /**
  * This abstract class is an abstract represent of the Implementation of the

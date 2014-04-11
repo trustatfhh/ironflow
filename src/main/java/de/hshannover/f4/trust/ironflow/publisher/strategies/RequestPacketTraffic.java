@@ -55,15 +55,15 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.w3c.dom.Document;
 
-import de.fhhannover.inform.trust.ifmapj.channel.SSRC;
-import de.fhhannover.inform.trust.ifmapj.exception.IfmapErrorResult;
-import de.fhhannover.inform.trust.ifmapj.exception.IfmapException;
-import de.fhhannover.inform.trust.ifmapj.identifier.Identifiers;
-import de.fhhannover.inform.trust.ifmapj.identifier.MacAddress;
-import de.fhhannover.inform.trust.ifmapj.messages.PublishNotify;
-import de.fhhannover.inform.trust.ifmapj.messages.Requests;
-import de.fhhannover.inform.trust.ifmapj.metadata.EventType;
-import de.fhhannover.inform.trust.ifmapj.metadata.Significance;
+import de.hshannover.f4.trust.ifmapj.channel.SSRC;
+import de.hshannover.f4.trust.ifmapj.exception.IfmapErrorResult;
+import de.hshannover.f4.trust.ifmapj.exception.IfmapException;
+import de.hshannover.f4.trust.ifmapj.identifier.Identifiers;
+import de.hshannover.f4.trust.ifmapj.identifier.MacAddress;
+import de.hshannover.f4.trust.ifmapj.messages.PublishNotify;
+import de.hshannover.f4.trust.ifmapj.messages.Requests;
+import de.hshannover.f4.trust.ifmapj.metadata.EventType;
+import de.hshannover.f4.trust.ifmapj.metadata.Significance;
 import de.hshannover.f4.trust.ironflow.Configuration;
 import de.hshannover.f4.trust.ironflow.publisher.RequestStrategy;
 

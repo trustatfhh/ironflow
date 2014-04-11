@@ -43,10 +43,10 @@ import java.util.logging.Logger;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
 
-import de.fhhannover.inform.trust.ifmapj.IfmapJHelper;
-import de.fhhannover.inform.trust.ifmapj.channel.ARC;
-import de.fhhannover.inform.trust.ifmapj.channel.SSRC;
-import de.fhhannover.inform.trust.ifmapj.exception.InitializationException;
+import de.hshannover.f4.trust.ifmapj.IfmapJHelper;
+import de.hshannover.f4.trust.ifmapj.channel.ARC;
+import de.hshannover.f4.trust.ifmapj.channel.SSRC;
+import de.hshannover.f4.trust.ifmapj.exception.InitializationException;
 import de.hshannover.f4.trust.ironflow.Ironflow;
 
 /**
