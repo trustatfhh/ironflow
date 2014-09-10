@@ -40,14 +40,12 @@ package de.hshannover.f4.trust.ironflow.utilities;
 
 import java.util.logging.Logger;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.TrustManager;
-
-import de.hshannover.f4.trust.ifmapj.IfmapJHelper;
+import de.hshannover.f4.trust.ifmapj.IfmapJ;
 import de.hshannover.f4.trust.ifmapj.channel.ARC;
 import de.hshannover.f4.trust.ifmapj.channel.SSRC;
+import de.hshannover.f4.trust.ifmapj.config.BasicAuthConfig;
+import de.hshannover.f4.trust.ifmapj.config.CertAuthConfig;
 import de.hshannover.f4.trust.ifmapj.exception.InitializationException;
-import de.hshannover.f4.trust.ironflow.Ironflow;
 
 /**
  * A ifmap class to initiate the ifmap server connection and to get the ssrc and arc channel
@@ -83,23 +81,13 @@ public final class IfMap {
 	public static SSRC initSsrc(String authMethod, String basicUrl, String certUrl, String user, String pass,
 			String keypath, String keypass) {
 
-		TrustManager[] tm = null;
-		KeyManager[] km = null;
-
-		try {
-			tm = IfmapJHelper.getTrustManagers(Ironflow.class.getResourceAsStream(keypath), keypass);
-			km = IfmapJHelper.getKeyManagers(Ironflow.class.getResourceAsStream(keypath), keypass);
-		} catch (InitializationException e) {
-
-			LOGGER.severe("could not read the security informations for the trust- and key- managers: " + e);
-			System.exit(1);
-		}
-
 		try {
 			if (authMethod.equals("basic")) {
-				ifmapSsrc = new ThreadSafeSsrc(basicUrl, user, pass, tm);
+				BasicAuthConfig basicConfig = new BasicAuthConfig(basicUrl, user, pass, keypath, keypass);
+				ifmapSsrc = IfmapJ.createSsrc(basicConfig);
 			} else if (authMethod.equals("cert")) {
-				ifmapSsrc = new ThreadSafeSsrc(certUrl, km, tm);
+				CertAuthConfig certConfig = new CertAuthConfig(certUrl, keypath, keypass, keypath, keypass);
+				ifmapSsrc = IfmapJ.createSsrc(certConfig);
 			} else {
 				throw new IllegalArgumentException("unknown authentication method '" + authMethod + "'");
 			}
