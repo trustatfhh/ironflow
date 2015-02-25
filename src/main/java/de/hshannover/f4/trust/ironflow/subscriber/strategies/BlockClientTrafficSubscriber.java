@@ -18,10 +18,10 @@
  * Email: trust@f4-i.fh-hannover.de
  * Website: http://trust.f4.hs-hannover.de
  * 
- * This file is part of ironflow, version 0.0.3, implemented by the Trust@HsH
+ * This file is part of ironflow, version 0.0.4, implemented by the Trust@HsH
  * research group at the Hochschule Hannover.
  * %%
- * Copyright (C) 2013 - 2014 Trust@HsH
+ * Copyright (C) 2013 - 2015 Trust@HsH
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
