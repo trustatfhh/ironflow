@@ -4,7 +4,7 @@
   <!-- general project information -->
 	<groupId>de.hshannover.f4.trust</groupId>
 	<artifactId>ironflow</artifactId>
-	<version>0.0.4</version>
+	<version>0.0.5</version>
 	<packaging>jar</packaging>
 	<inceptionYear>2013</inceptionYear>
 	<name>ironflow</name>
